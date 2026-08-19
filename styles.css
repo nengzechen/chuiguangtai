@@ -1,0 +1,1185 @@
+/*
+ * 观星台 / 藏品页 / 观星者页的组件样式。令牌在 tokens.css。
+ *
+ * 世界：开顶 The Open Dome（见 tokens.css 顶部）。
+ * 首页是走过那面墙，这几页是**站在墙前面办事**。
+ * 但站的地方是同一处：圆顶开着，头顶是同一片天、同一条银河、同一批 88 座。
+ *
+ * Operate 页的规矩：表达不能盖过任务。
+ * 所以天在这几页上**退一档** —— 不是换一片天，是同一片天被工作台压暗了。
+ * 你在暗处操作仪器的时候，不需要仪器表演。品牌活在读数、刻度和材质里。
+ *
+ * ⚠️ 藏品 SVG 里**不用**本站的字。那些图要能在 OpenSea、钱包、
+ * 任何地方独立渲染，不能依赖这里的字体文件。
+ */
+
+html { scroll-behavior: smooth; }
+@media (prefers-reduced-motion: reduce) { html { scroll-behavior: auto; } }
+
+body {
+  margin: 0;
+  color: var(--lime-mid);
+  font: var(--t-md)/1.7 var(--sans);
+  background: var(--ground);
+  overflow-x: clip;
+  text-wrap: pretty;
+  line-break: strict;
+}
+
+/* 首屏不做任何淡入。骨架条负责占位。
+   任何把整页 opacity 吊起来等 JS/rAF/动画的做法，在标签页不可见时都会把页面永久留白 —— 踩过一次就够了。 */
+
+/* ═════════════════════════════════════════ 地 */
+
+/*
+ * ══ 层序 ══ 和首页同一条：
+ *
+ *   0  body::before   地 + 垂光
+ *   1  body::after    颗粒
+ *   2  .wrap          正文
+ *
+ * 前三版这里有一块画布和一层暗角，**都删了**（见 landing.css 里那一段）。
+ *
+ * 和首页同一束光、同一块地 —— 两边站的是同一个地方。
+ * 唯一的差别：作业页的光**再收一档**（68% → 56% 的高度）。
+ * 这几页顶上就是操作栏和读数条，光不该压在读数上；
+ * 表达不能盖过任务，这一条从第一版继承下来，它一直是对的。
+ */
+body::before {
+  content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background:
+    radial-gradient(68% 74% at 50% -14%, var(--shaft), transparent 62%),
+    linear-gradient(180deg,
+      var(--ground-hi) 0%, var(--ground) 46%, var(--ground-lo) 100%);
+}
+
+/* 颗粒。抖动，防止上面那层渐变出条带（见 landing.css 里那一段） */
+body::after {
+  content: ""; position: fixed; inset: 0; z-index: 1; pointer-events: none;
+  opacity: var(--grain-opacity);
+  mix-blend-mode: overlay;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='160' height='160'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.82' numOctaves='3' stitchTiles='stitch'/%3E%3CfeColorMatrix type='saturate' values='0'/%3E%3C/filter%3E%3Crect width='160' height='160' filter='url(%23n)'/%3E%3C/svg%3E");
+  background-size: 160px 160px;
+}
+
+/*
+ * 链接的底色。
+ * 不写这一条，任何一个忘了配色的 <a> 都会是浏览器默认的蓝紫 ——
+ * 那是整页上唯一不属于这个设计系统的颜色，而且总在最不起眼的地方冒出来。
+ * 组件自己的规则选择器都更具体，会盖掉它。
+ */
+a { color: var(--seal-light); text-underline-offset: 3px; }
+
+.wrap {
+  /* 层序见上面 .sky 那一段。正文在最上面：天盖不住刻在板上的字 */
+  position: relative; z-index: 2;
+  max-width: 1180px; margin: 0 auto;
+  padding: 26px 24px 96px;
+}
+@media (max-width: 700px) { .wrap { padding: 18px 16px 72px; } }
+
+/* ═════════════════════════════════════════ 顶栏 = 观测台面板 */
+
+/*
+ * 导航紧跟在台标后面，靠左钉死。
+ * 之前是居中在中间那一列 —— 而右侧的阶段说明、地址、按钮在加载过程中
+ * 会反复变宽，每变一次导航就被重新居中一次，看起来就是文字在左右乱抖。
+ * 位置不该由异步内容决定。
+ */
+header {
+  display: grid;
+  grid-template-columns: auto auto minmax(0, 1fr);
+  align-items: center; gap: 26px;
+  margin-bottom: 42px; padding-bottom: 16px;
+  border-bottom: 1px solid var(--rule);
+}
+.nav { justify-self: start; }
+.headright { justify-self: end; }
+/* 品牌 + 导航 + 阶段读数 + 三个按钮，一行放不下 —— 1340 以下导航自己占一行 */
+@media (max-width: 1340px) {
+  header { grid-template-columns: auto 1fr; row-gap: 14px; }
+  .nav { grid-column: 1 / -1; grid-row: 2; justify-self: start; flex-wrap: wrap; gap: 18px; }
+  .headright { grid-column: 2; grid-row: 1; }
+}
+@media (max-width: 1120px) { .phasenote { display: none; } }
+/*
+ * 窄屏上顶栏必须自己折行。
+ * 右侧那组（阶段读数 + 钱包按钮）为了防止异步内容改变宽度而写了 min-width，
+ * 加起来 383px —— 在 375 的屏上它会把整个文档撑到 557，
+ * 于是每一段正文都被推出屏幕外，而 overflow 只是把溢出藏起来。
+ * 防抖的 min-width 只在宽屏上有意义，窄屏上它是 bug。
+ */
+@media (max-width: 720px) {
+  header { grid-template-columns: minmax(0, 1fr); row-gap: 14px; }
+  .headright {
+    grid-column: 1; grid-row: 2; justify-self: start;
+    flex-wrap: wrap; width: 100%;
+  }
+  #connect { min-width: 0; flex: 1 1 auto; }
+  #phasechip { min-width: 0; }
+}
+
+.mark { display: flex; align-items: center; gap: 12px; text-decoration: none; }
+.sigil {
+  width: 34px; height: 34px; flex: none;
+  fill: none; stroke: var(--lime); stroke-width: 1.6;
+  stroke-linecap: round; stroke-linejoin: round;
+}
+h1 {
+  margin: 0;
+  font: 900 var(--t-xl)/1 var(--carve);
+  letter-spacing: var(--ls-carve);
+  color: var(--lime);
+}
+.latin {
+  margin: 3px 0 0; font: var(--t-3xs)/1 var(--mono);
+  letter-spacing: var(--ls-widest); color: var(--lime-faint);
+}
+
+.nav { display: flex; gap: 18px; flex-shrink: 0; }
+.nav a {
+  font: var(--t-xs) var(--sans); color: var(--lime-low); text-decoration: none;
+  padding-bottom: 4px;
+  border-bottom: 1px solid transparent; transition: color .2s, border-color .2s;
+}
+.nav a:hover, .nav a.on { color: var(--lime); border-color: var(--seal); }
+@media (max-width: 900px) { .nav { display: none; } }
+
+.headright { display: flex; align-items: center; gap: 9px; }
+/* 地址替换掉"登台"时宽度会跳，先把位置留出来 */
+#connect {
+  min-width: 168px; text-align: center;
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+}
+#phasechip { min-width: 104px; justify-content: center; }
+
+/* 阶段读数：面板上的一格读数，不是一个圆角标签 */
+.chip {
+  display: inline-flex; align-items: center; gap: 8px;
+  padding: 8px 14px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  font: var(--t-xs)/1 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime);
+  background: var(--sunk-2);
+  white-space: nowrap;
+}
+.pulse {
+  width: 5px; height: 5px; border-radius: 50%;
+  background: var(--seal); flex: none;
+}
+.chip.sealed { color: var(--lime-low); }
+.chip.sealed .pulse { background: var(--lime-faint); }
+.phasenote { color: var(--lime-faint); }
+
+/* ═════════════════════════════════════════ 序章 */
+
+.lore { max-width: 46em; margin: 0 0 48px; }
+.lead {
+  font: 900 var(--t-4xl)/1.18 var(--carve);
+  letter-spacing: var(--ls-carve); margin: 0 0 var(--s5);
+  color: var(--lime);
+  text-wrap: balance;
+}
+.lore p { margin: 0 0 12px; color: var(--lime-mid); max-width: 40em; }
+.lore .dim { color: var(--lime-low); }
+.lore b { color: var(--lime); font-weight: 600; }
+@media (max-width: 700px) { .lead { font-size: var(--t-2xl); } }
+
+.hero-note {
+  display: flex; flex-wrap: wrap; gap: 10px 22px;
+  margin-top: var(--s5); padding-top: var(--s4);
+  border-top: 1px solid var(--rule);
+  font: var(--t-xs)/1.6 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-faint);
+}
+
+/* ═════════════════════════════════════════ 读数条 */
+
+/*
+ * 四个读数共用一个外框、一条基线。它不是四张统计卡：
+ * 卡片是懒惰的容器，仪器面板是一整块。
+ */
+.stats {
+  display: grid; grid-template-columns: repeat(4, 1fr);
+  margin: 0 0 48px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--sunk-2);
+}
+.stat {
+  display: grid; gap: 5px; padding: 18px 20px;
+  border-right: 1px solid var(--rule);
+}
+.stat:last-child { border-right: 0; }
+.stat span:first-child, .stat .sk {
+  font: 700 var(--t-3xl)/1 var(--mono); color: var(--lime);
+  font-variant-numeric: tabular-nums;
+}
+.stat i {
+  font: var(--t-2xs)/1.4 var(--mono); font-style: normal;
+  letter-spacing: var(--ls-wider); color: var(--lime-faint);
+  text-transform: uppercase;
+}
+/* 只会往下走的那两个读数用安全灯红标出来 —— 这是这一页最要紧的信息 */
+.stat.gold .sk, .stat.gold span:first-child { color: var(--seal); }
+@media (max-width: 860px) {
+  .stats { grid-template-columns: repeat(2, 1fr); }
+  .stat:nth-child(2) { border-right: 0; }
+  .stat:nth-child(-n+2) { border-bottom: 1px solid var(--rule); }
+}
+@media (max-width: 460px) {
+  .stats { grid-template-columns: 1fr; }
+  .stat { border-right: 0; border-bottom: 1px solid var(--rule); }
+  .stat:last-child { border-bottom: 0; }
+}
+
+/* ═════════════════════════════════════════ 面板 */
+
+/*
+ * 调查底板。只用一道边确定层次 —— 一条 1px 边线再加一层宽阴影
+ * 是"幽灵卡片"，两种层次语言打架。
+ */
+.card {
+  position: relative;
+  margin: 0 0 32px; padding: 28px;
+  border: 1px solid var(--rule); border-radius: 3px;
+  background: var(--sunk-2);
+}
+@media (max-width: 700px) { .card { padding: 20px 16px; } }
+
+.sechead {
+  display: flex; align-items: flex-start; justify-content: space-between;
+  gap: 16px; margin-bottom: 22px;
+}
+.sechead h2, h2 {
+  margin: 0;
+  font: 900 var(--t-2xl)/1.3 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.sub {
+  margin: 6px 0 0; font-size: var(--t-sm); color: var(--lime-low);
+  max-width: 44em;
+}
+.tiny { font: var(--t-2xs)/1.6 var(--mono); color: var(--lime-faint); letter-spacing: var(--ls-wide); }
+.dim { color: var(--lime-low); }
+
+/* ═════════════════════════════════════════ 壁面 */
+
+.dome { padding-bottom: 22px; }
+.domecount {
+  font: var(--t-xs)/1 var(--mono); color: var(--lime-low);
+  letter-spacing: var(--ls-wide); white-space: nowrap;
+}
+.domecount b {
+  font-size: var(--t-xl); color: var(--lime); margin-right: 5px;
+  font-variant-numeric: tabular-nums;
+}
+
+.domewrap { position: relative; margin: 0 0 18px; }
+/*
+ * 内壁整幅画在 SVG 里（dome.js 的 domeChrome）：开缝、子午肋、四道肋环。
+ * 圆顶是人造的结构，所以它该被**画出来**而不是贴一张材质图 ——
+ * 一张照片给不了"这道环上正好坐得下 12 个刻位"这件事。
+ */
+.domesvg {
+  display: block; width: 100%; height: auto;
+  border-radius: 3px;
+  background: var(--cut-floor);
+}
+/* 肋环号 */
+.ringlab {
+  font-family: var(--mono); font-size: var(--t-2xs);
+  fill: var(--lime-faint); letter-spacing: .06em;
+}
+
+/*
+ * 一个龛 = 凿进内壁的一个凹坑。
+ *
+ * 它必须读起来是**凹的**：坑口的上沿被开缝的天光照到（亮线），下沿背光（暗线），
+ * 坑底比壁面更黑。刻过的坑里那点颜色是被那道光勉强照出来的，
+ * 不是一块饱和的色片 —— 一座只点安全灯的圆顶里没有鲜艳的东西。
+ */
+.seat-g { cursor: pointer; }
+/* 坑口的棱：上沿被灯照亮，所以描边比坑内亮一档 */
+.seat-g .recess {
+  fill: var(--sunk-3);
+  stroke: var(--rule);
+  stroke-width: 1;
+}
+/* 坑的内壁：上暗下亮，凹感全在这里 */
+.seat-g .cut { fill: url(#nicheEmpty); }
+.seat-g.filled .recess { stroke: var(--rule-strong); }
+/* 天区决定龛里那张星图的底色 —— 和藏品图、首页那座穹顶同源 */
+.seat-g.filled.r0 .cut { fill: url(#niche0); }
+.seat-g.filled.r1 .cut { fill: url(#niche1); }
+.seat-g.filled.r2 .cut { fill: url(#niche2); }
+.seat-g.mine .recess, .seat-g.kin .recess { stroke: var(--seal); stroke-width: 1.6; }
+.seat-g:hover .recess, .seat-g:focus-visible .recess { stroke: var(--lime); stroke-width: 1.6; }
+.seat-g:focus-visible { outline: none; }
+
+/* 龛里那张小星图。星数是这个刻位真实的主星数 */
+.seat-g .asterism path { stroke: var(--asterism-line); stroke-width: 0.9; fill: none; }
+.seat-g .asterism .mags { fill: var(--asterism-star); }
+.seat-g.filled.r0 .asterism .mags { fill: var(--region-n); }
+.seat-g.filled.r1 .asterism .mags { fill: var(--region-s); }
+.seat-g.filled.r2 .asterism .mags { fill: var(--region-e); }
+.seat-g:hover .asterism path { stroke: var(--asterism-line-lit); }
+.seat-g .glyph { transition: transform .12s ease-out; }
+.seat-g:hover .glyph { transform: translateY(-1.5px); }
+@media (prefers-reduced-motion: reduce) { .seat-g .glyph { transition: none; } }
+
+/* 星域被点亮时，其余的龛退到背景里 */
+.domesvg.focused .seat-g:not(.kin) { opacity: .35; }
+
+.reticle .ret-ring { fill: none; stroke: var(--seal); stroke-width: 1.2; }
+.reticle .ret-tick { stroke: var(--seal); stroke-width: 1; }
+
+/* 悬停读数：跟着指针走的一小块牌子 */
+.seattip {
+  position: absolute; z-index: 5; pointer-events: none;
+  padding: 7px 10px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--stone-deep);
+  font: var(--t-2xs)/1.5 var(--mono); color: var(--lime);
+  white-space: nowrap;
+}
+
+.focusbar {
+  display: flex; flex-wrap: wrap; align-items: center; gap: 12px;
+  margin: 0 0 14px; padding: 10px 14px;
+  border: 1px solid var(--rule-seal); border-radius: 3px;
+  font: var(--t-xs)/1.5 var(--mono); color: var(--lime);
+}
+
+.legend {
+  display: flex; flex-wrap: wrap; gap: 10px 22px; align-items: center;
+  font: var(--t-2xs)/1.6 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-faint);
+}
+.legend span { display: inline-flex; align-items: center; gap: 7px; }
+.legend .hint { color: var(--lime-faint); font-family: var(--sans); letter-spacing: 0; }
+.dot {
+  width: 11px; height: 10px; border-radius: 2px; display: inline-block;
+  background: var(--sunk-3);
+  box-shadow: inset 0 0 0 1px var(--rule-strong);
+}
+.dot.r0 { background: var(--region-n-dot); }
+.dot.r1 { background: var(--region-s-dot); }
+.dot.r2 { background: var(--region-e-dot); }
+.dot.mine { background: transparent; box-shadow: inset 0 0 0 1.6px var(--seal); }
+
+/* ── 龛的详情 */
+
+.seat {
+  display: grid; grid-template-columns: 220px minmax(0, 1fr); gap: 26px;
+  margin-top: 22px; padding-top: 22px;
+  border-top: 1px solid var(--rule);
+}
+@media (max-width: 760px) { .seat { grid-template-columns: 1fr; } }
+.seatleft { display: grid; gap: 9px; align-content: start; }
+.seatart {
+  aspect-ratio: 1; border-radius: 3px; overflow: hidden;
+  background: var(--cut-floor);
+  border: 1px solid var(--rule);
+}
+.seatart img, .seatart svg { width: 100%; height: 100%; display: block; }
+
+.seattop { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 16px; }
+.seatinfo h3 {
+  margin: 0;
+  font: 900 var(--t-xl)/1.3 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.seatord { margin: 4px 0 0; font: var(--t-2xs)/1 var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); }
+
+.seatrow {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 9px 0; border-bottom: 1px solid var(--rule);
+  font-size: var(--t-sm);
+}
+.seatrow span { color: var(--lime-low); }
+.seatrow b { color: var(--lime); font-weight: 400; font-family: var(--mono); font-size: var(--t-xs); }
+.seatnote { margin: 14px 0 0; font-size: var(--t-sm); color: var(--lime-low); }
+
+/* ── 刻痕志：一层层钉上去的调查标牌，前一块永远拆不掉 */
+
+.chronicle-wrap { margin-top: 22px; }
+.chronhead { display: flex; align-items: baseline; gap: 12px; flex-wrap: wrap; margin-bottom: 12px; }
+.chronhead h4 {
+  margin: 0; font: 900 var(--t-xl)/1 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.chronsub, .mn-note { font-size: var(--t-xs); color: var(--lime-faint); }
+
+.chronicle { list-style: none; margin: 0; padding: 0; display: grid; gap: 1px; }
+.chronitem {
+  padding: 12px 14px;
+  background: var(--sunk-2);
+  border-left: 1px solid var(--rule-strong);
+}
+/* 最新一块牌子压在最上面。更早的那些一块都没少 */
+.chronitem:last-child { border-left-color: var(--seal); }
+.chronmeta {
+  display: flex; flex-wrap: wrap; gap: 4px 12px; margin: 0 0 5px;
+  font: var(--t-3xs)/1.5 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-faint);
+}
+.chronwords { margin: 0; color: var(--lime); font-size: var(--t-sm); }
+.chronwords.blank { color: var(--lime-faint); font-style: normal; }
+
+/* ── 题刻 */
+
+.carve { margin-top: 20px; padding-top: 18px; border-top: 1px solid var(--rule); }
+.carve label { display: block; margin-bottom: 9px; font-size: var(--t-sm); color: var(--lime-low); }
+.carve textarea {
+  width: 100%; padding: 12px 14px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--sunk-3);
+  color: var(--lime); font: var(--t-md)/1.6 var(--sans);
+  resize: vertical;
+}
+.carve textarea::placeholder { color: var(--lime-faint); }
+.carve textarea:focus { outline: none; border-color: var(--seal); }
+.carverow { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 10px; }
+.carvecount { font: var(--t-2xs) var(--mono); color: var(--lime-faint); font-variant-numeric: tabular-nums; }
+
+/* ═════════════════════════════════════════ 两层获取 */
+
+/*
+ * 拾星屑 + 图鉴，两张卡并排、上沿对齐。
+ * 各自保持自然高度：把矮的那张拉到和高的一样，
+ * 要么在卡底留一片空地，要么把图鉴那五行撑得空荡荡 —— 两种都更难看。
+ */
+.duo { display: grid; grid-template-columns: 1fr 1fr; gap: 32px; align-items: start; }
+@media (max-width: 980px) { .duo { grid-template-columns: 1fr; } }
+
+.premier-card {
+  display: grid; grid-template-columns: 300px minmax(0, 1fr); gap: 32px;
+  padding: 32px;
+}
+@media (max-width: 860px) { .premier-card { grid-template-columns: 1fr; gap: 22px; } }
+
+.premier-art, .artwrap { position: relative; }
+.mat, .artwrap {
+  border-radius: 3px; overflow: hidden;
+  background: var(--cut-floor);
+  border: 1px solid var(--rule);
+}
+.art { aspect-ratio: 1; display: block; }
+.art img, .art svg { width: 100%; height: 100%; display: block; }
+.zoomable { cursor: zoom-in; }
+.zoombtn {
+  position: absolute; right: 8px; bottom: 8px;
+  padding: 5px 10px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--sunk-3);
+  color: var(--lime-low); font: var(--t-2xs) var(--mono);
+  cursor: pointer;
+}
+.zoombtn:hover { color: var(--lime); border-color: var(--seal); }
+
+.tierhead { display: flex; align-items: flex-start; justify-content: space-between; gap: 14px; margin-bottom: 18px; }
+.premier-body h3, .tierhead h3 {
+  margin: 8px 0 4px;
+  font: 900 var(--t-2xl)/1.25 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.tiersub { margin: 0 0 14px; font: var(--t-2xs)/1.5 var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); }
+.tierlore { font-size: var(--t-sm); color: var(--lime-mid); max-width: 42em; }
+
+/* 标记：免费的那层和限量的那层，用一句话说清，不用勋章 */
+.badge {
+  display: inline-block; padding: 4px 9px;
+  border: 1px solid var(--rule-strong); border-radius: 2px;
+  font: var(--t-3xs)/1.4 var(--mono); letter-spacing: var(--ls-wider);
+  color: var(--lime-low); text-transform: uppercase;
+}
+.badge.premier { border-color: var(--rule-seal); color: var(--seal); }
+
+.premier-facts, .kp-stats {
+  display: flex; flex-wrap: wrap; gap: 26px;
+  margin: 20px 0; padding: 16px 0;
+  border-top: 1px solid var(--rule); border-bottom: 1px solid var(--rule);
+}
+.premier-facts div, .kp-stats div { display: grid; gap: 4px; }
+.premier-facts b, .kp-stats b {
+  font: 700 var(--t-2xl)/1 var(--mono); color: var(--lime);
+  font-variant-numeric: tabular-nums;
+}
+.premier-facts i, .kp-stats i {
+  font: var(--t-2xs)/1 var(--mono); font-style: normal;
+  letter-spacing: var(--ls-wide); color: var(--lime-faint);
+}
+.premier-foot, .lawfoot, .tk-log {
+  margin: 14px 0 0; font-size: var(--t-xs); color: var(--lime-faint);
+}
+
+.remain { text-align: right; white-space: nowrap; }
+.remain b { display: block; font: 700 var(--t-2xl)/1 var(--mono); color: var(--lime); font-variant-numeric: tabular-nums; }
+.remain i { font: var(--t-2xs) var(--mono); font-style: normal; color: var(--lime-faint); }
+
+.nextcon { display: inline-block; margin-bottom: 12px; font: var(--t-xs) var(--mono); color: var(--seal); text-decoration: none; }
+.nextcon:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* 门槛提示：这是这个项目最要紧的一条规矩，不能长得像一条报错 */
+.gate {
+  display: flex; gap: 10px; align-items: flex-start;
+  margin: 16px 0; padding: 13px 15px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--sunk-2);
+  font-size: var(--t-sm); color: var(--lime-mid);
+}
+.gate.pass { border-color: var(--rule-seal); color: var(--lime); }
+.gateicon { width: 16px; height: 16px; flex: none; margin-top: 3px; stroke: var(--seal); fill: none; stroke-width: 1.8; }
+
+/* ── 余量计 */
+
+.meterline { display: flex; align-items: center; gap: 14px; margin: 18px 0; }
+.meter {
+  flex: 1; height: 4px; border-radius: 2px;
+  background: var(--sunk-3);
+  overflow: hidden;
+}
+.meter .fill { height: 100%; background: var(--seal); }
+.metertext { font: var(--t-2xs) var(--mono); color: var(--lime-faint); white-space: nowrap; }
+
+/* ── 数量 */
+
+.qty { display: flex; align-items: center; gap: 10px; margin: 18px 0; flex-wrap: wrap; }
+.qtyval {
+  min-width: 54px; text-align: center;
+  font: 700 var(--t-xl)/1 var(--mono); color: var(--lime);
+  font-variant-numeric: tabular-nums;
+}
+.qtyhint { font: var(--t-2xs) var(--mono); color: var(--lime-faint); text-decoration: none; }
+.qtyhint:hover { color: var(--seal); }
+
+/* ── 两条路 */
+
+/*
+ * 付钱，或者把攒了七天的星屑交出去。
+ * 两个按钮同宽同高并排 —— 它们是同一件事的两种付法，谁也不该看起来像备选。
+ * 中间那条"或"是一条被字断开的线，不是一个居中的词。
+ */
+.twoways { display: grid; gap: 12px; }
+.orline {
+  display: grid; grid-template-columns: 1fr auto 1fr; align-items: center; gap: 12px;
+  font: var(--t-2xs) var(--mono); letter-spacing: var(--ls-wider); color: var(--lime-faint);
+}
+.orline::before, .orline::after { content: ""; height: 1px; background: var(--rule); }
+/* 交星屑那条：描边而不是填充。它不花钱，但它花的是七天 */
+.btn.act.offer {
+  background: transparent; color: var(--seal); border-color: var(--seal);
+}
+.btn.act.offer:hover:not(:disabled) { background: var(--seal-wash); }
+.offernote { margin: 0; font-size: var(--t-xs); color: var(--lime-faint); }
+
+/* 自己的两条额度：今天的和这辈子的 */
+.embertoday {
+  margin: -6px 0 0;
+  font: var(--t-2xs) var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-faint);
+}
+
+/* ═════════════════════════════════════════ 控件 */
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 8px;
+  padding: 10px 18px;
+  border: 1px solid var(--seal); border-radius: 3px;
+  background: transparent; color: var(--seal);
+  font: var(--t-sm)/1 var(--sans); letter-spacing: var(--ls-wide);
+  text-decoration: none; cursor: pointer;
+  transition: background-color .18s, color .18s, border-color .18s;
+}
+.btn:hover:not(:disabled) { background: var(--seal-wash); }
+.btn:active:not(:disabled) { transform: translateY(1px); }
+.btn:disabled { border-color: var(--rule-strong); color: var(--lime-faint); cursor: not-allowed; }
+
+/* 主行动：填充青。整页只有一到两个 */
+.btn.act, .btn.gold {
+  width: 100%; padding: 14px 20px;
+  background: var(--seal); color: var(--stone-deep); font-weight: 600;
+  border-color: var(--seal);
+}
+.btn.act:hover:not(:disabled), .btn.gold:hover:not(:disabled) { background: var(--lime); border-color: var(--lime); }
+/* 只把背景清掉是不够的：填充态的深色墨字会留在透明底上，
+   于是"已售罄"这个多数访客唯一会遇到的状态，字是看不见的 */
+.btn.act:disabled, .btn.gold:disabled {
+  background: transparent;
+  color: var(--lime-faint);
+  border-color: var(--rule-strong);
+}
+
+.btn.ghost { border-color: var(--rule-strong); color: var(--lime-low); }
+.btn.ghost:hover { color: var(--lime); border-color: var(--seal); background: transparent; }
+.btn.small { padding: 6px 12px; font-size: var(--t-xs); }
+.btn.full { width: 100%; }
+.btn.icon { padding: 8px 10px; }
+.btn.sq { width: 38px; height: 38px; padding: 0; font-size: var(--t-lg); }
+.btn .ico { width: 15px; height: 15px; fill: none; stroke: currentColor; stroke-width: 1.7; stroke-linecap: round; stroke-linejoin: round; }
+
+.addrlink { color: var(--lime-low); text-decoration: none; border-bottom: 1px solid var(--rule-strong); font-family: var(--mono); font-size: var(--t-xs); }
+.addrlink:hover { color: var(--seal); border-color: var(--seal); }
+
+/* ═════════════════════════════════════════ 三条规矩 */
+
+.lawlist { list-style: none; margin: 0; padding: 0; counter-reset: law; display: grid; gap: 1px; }
+.lawlist li {
+  display: grid; grid-template-columns: 42px 1fr; gap: 14px;
+  padding: 16px 14px;
+  background: var(--sunk-2);
+}
+/* 序号是序列信息（三条规矩确实有顺序），不是装饰编号 */
+.lawlist li::before {
+  counter-increment: law; content: "0" counter(law);
+  font: 700 var(--t-lg)/1.2 var(--mono);
+  /* 暗适应之后色觉没了。安全灯拧亮才回来 —— 和首页是同一条物理 */
+  color: var(--seal);
+}
+.lawlist li:hover { background: var(--sunk-3); }
+.lawlist b {
+  display: block; margin-bottom: 5px;
+  font: 900 var(--t-lg)/1.4 var(--carve); letter-spacing: var(--ls-carve);
+  color: var(--lime); font-weight: 900;
+}
+.lawlist p { margin: 0; font-size: var(--t-sm); color: var(--lime-mid); }
+.laws { --seal: var(--lime-faint); }
+.laws li:hover, .laws li:focus-within { --seal: var(--seal); }
+
+/* ═════════════════════════════════════════ 观测纪年 */
+
+.timeline { list-style: none; margin: 0; padding: 0; }
+.tl-item {
+  display: grid; grid-template-columns: 104px 1fr; gap: 24px;
+  padding: 18px 0; border-top: 1px solid var(--rule);
+}
+.tl-item:last-child { border-bottom: 1px solid var(--rule); }
+.tl-era { font: var(--t-xs)/1.6 var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); }
+.tl-item:last-child .tl-era { color: var(--seal); }
+.tl-body b {
+  display: block; margin-bottom: 5px;
+  font: 900 var(--t-lg)/1.4 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.tl-body p { margin: 0; font-size: var(--t-sm); max-width: 46em; }
+@media (max-width: 640px) { .tl-item { grid-template-columns: 1fr; gap: 6px; } }
+
+/* ═════════════════════════════════════════ 名录 */
+
+.rosterlist { display: grid; gap: 1px; }
+/*
+ * 一行五格：序号 / 称号 / 地址 / 星座名 / 席数。
+ * 列数必须和格子数对得上 —— 之前只声明了四列，第五格"N 席"
+ * 被挤到第二行去，每一行都拖着一条空尾巴。
+ * 称号那一列固定宽：它经常是空的（1 席不挂称号），
+ * 用 auto 的话每行的地址都会横着乱跳。
+ */
+.rosterrow {
+  display: grid;
+  grid-template-columns: 34px 5em 9.5em minmax(0, 1fr) auto;
+  gap: 14px; align-items: baseline;
+  padding: 12px 14px;
+  background: var(--sunk-2);
+  text-decoration: none;
+}
+.rosterrow:hover { background: var(--sunk-3); }
+.rk-no { font: var(--t-xs) var(--mono); color: var(--lime-faint); font-variant-numeric: tabular-nums; }
+.rk-addr { font: var(--t-sm) var(--mono); color: var(--lime); }
+/* 称号只在 2 席以上才出现，所以出现即有分量，用正文亮度而不是次级 */
+.rk-title { font: var(--t-xs) var(--sans); color: var(--lime); white-space: nowrap; }
+/* 星座名是数据，不是可点的东西 —— 整列刷成安全灯红会把那条唯一饱和色用废 */
+.rk-seats {
+  font: var(--t-sm)/1.5 var(--sans); color: var(--lime-mid);
+  overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+}
+.rk-count { font: var(--t-xs) var(--mono); color: var(--lime-low); text-align: right; white-space: nowrap; }
+.rk-count i { font-style: normal; color: var(--lime-faint); margin-left: 3px; }
+.rk-you { color: var(--seal); margin-left: 6px; font-style: normal; }
+/* 窄屏放不下五列：先让星座名退场，名录首先要回答"谁、几席" */
+@media (max-width: 700px) {
+  .rosterrow { grid-template-columns: 30px 4.5em minmax(0, 1fr) auto; gap: 10px; }
+  .rk-seats { display: none; }
+}
+.rostermore, .feedmore { margin-top: 12px; }
+
+/* 称号阶梯 */
+.ranklist { display: grid; gap: 1px; }
+.rankrow {
+  display: grid; grid-template-columns: auto 1fr auto; gap: 14px; align-items: baseline;
+  padding: 11px 14px; background: var(--sunk-2);
+  font-size: var(--t-sm);
+}
+.rankrow.on { background: var(--seal-wash); color: var(--lime); }
+.rank {
+  display: inline-flex; align-items: baseline; gap: 8px;
+  padding: 5px 10px; border: 1px solid var(--rule-strong); border-radius: 3px;
+  white-space: nowrap;
+}
+.rank b { font: var(--t-sm) var(--sans); color: var(--lime); }
+.rank i { font: var(--t-2xs) var(--mono); font-style: normal; color: var(--lime-faint); }
+
+/* ═════════════════════════════════════════ 链上动态 */
+
+.feed, .feedbox { display: grid; gap: 1px; }
+.fitem {
+  display: grid; grid-template-columns: 26px 1fr auto; gap: 12px; align-items: baseline;
+  padding: 11px 14px; background: var(--sunk-2);
+  font-size: var(--t-sm);
+}
+.ficon { width: 16px; height: 16px; stroke: var(--lime-faint); fill: none; stroke-width: 1.6; }
+.ftext { color: var(--lime-mid); }
+.ftext b { color: var(--lime); font-weight: 600; }
+.fblock { font: var(--t-2xs) var(--mono); color: var(--lime-faint); white-space: nowrap; }
+.feedend { padding: 14px; font-size: var(--t-xs); color: var(--lime-faint); text-align: center; }
+
+/* ═════════════════════════════════════════ 收藏与图鉴 */
+
+.vaultgrid {
+  display: grid; grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); gap: 14px;
+}
+/* 图鉴：一档一行 —— 缩略图、名字与来历、稀有度刻度 */
+.codexlist { display: grid; gap: 1px; }
+.codexrow {
+  display: grid; grid-template-columns: 54px minmax(0, 1fr) auto;
+  gap: 14px; align-items: center;
+  padding: 12px 14px;
+  border: 0; border-radius: 0;
+  background: var(--sunk-2);
+}
+.codexrow .codexart { width: 54px; aspect-ratio: 1; position: relative; }
+.codexrow .lock {
+  position: absolute; inset: 0; display: grid; place-items: center;
+  font: 700 var(--t-lg) var(--mono); color: var(--lime-faint);
+  background: var(--sunk-3);
+}
+/* 没拾到的那几档：缩略图退成灰的，整行压暗。轮廓还在，颜色是拾到才有的 */
+.codexname { display: grid; gap: 2px; }
+.codexpct { display: grid; gap: 5px; justify-items: end; }
+.codexpct b { font: var(--t-2xs) var(--mono); color: var(--lime-faint); letter-spacing: var(--ls-wide); }
+/* 稀有度刻度：和藏品图右上角那把尺是同一套读法 */
+.tiergauge { display: inline-flex; gap: 3px; }
+.tiergauge i { width: 3px; height: 13px; background: var(--rule-strong); }
+.tiergauge i.on { background: var(--seal); height: 15px; }
+.relic, .codexrow {
+  display: grid; gap: 8px; padding: 10px;
+  border: 1px solid var(--rule); border-radius: 3px;
+  background: var(--sunk-2);
+  text-decoration: none;
+  /* 这是个 <a>：不接管颜色，标题就会是浏览器默认的蓝紫色 */
+  color: var(--lime);
+}
+.relic:hover, .codexrow:hover { border-color: var(--rule-seal); }
+.relic:hover .cap { color: var(--seal); }
+.codexart, .relic .art, .relic img {
+  aspect-ratio: 1; border-radius: 2px; overflow: hidden; background: var(--cut-floor);
+  width: 100%; height: auto; display: block; object-fit: cover;
+}
+.relic .cap {
+  font: var(--t-xs)/1.4 var(--sans); color: var(--lime);
+  transition: color .18s;
+}
+.codexname, .relic .t {
+  font: 900 var(--t-sm)/1.3 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.codexlatin, .relic .m {
+  font: var(--t-3xs)/1.4 var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint);
+}
+.codexlore { font-size: var(--t-xs); color: var(--lime-low); }
+.codexpct { font: var(--t-2xs) var(--mono); color: var(--seal); font-variant-numeric: tabular-nums; }
+.codexrow.locked { opacity: .5; }
+.codexrow.locked .codexart { filter: grayscale(1); }
+
+/* ═════════════════════════════════════════ 分段筛选 */
+
+.segmented { display: inline-flex; border: 1px solid var(--rule-strong); border-radius: 3px; overflow: hidden; }
+.seg {
+  padding: 7px 14px; border: 0; background: transparent;
+  color: var(--lime-low); font: var(--t-xs) var(--sans); cursor: pointer;
+  border-right: 1px solid var(--rule);
+}
+.seg:last-child { border-right: 0; }
+.seg.on { background: var(--seal); color: var(--stone-deep); font-weight: 600; }
+
+/* ═════════════════════════════════════════ 灯箱 / 开图 / 手册 */
+
+.lightbox, .reveal, .manual {
+  position: fixed; inset: 0; z-index: 40;
+  display: grid; place-items: center; padding: 24px;
+}
+.lb-backdrop, .rv-backdrop, .mn-backdrop {
+  position: absolute; inset: 0;
+  background: var(--sunk-3);
+}
+.lb-panel, .rv-panel, .mn-panel {
+  position: relative; z-index: 1;
+  max-width: 940px; width: 100%; max-height: 88vh; overflow: auto;
+  padding: 26px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--stone-deep);
+}
+.lb-panel { display: grid; grid-template-columns: minmax(0, 1fr) 300px; gap: 26px; }
+@media (max-width: 820px) { .lb-panel { grid-template-columns: 1fr; } }
+.lb-art { border-radius: 3px; overflow: hidden; background: var(--cut-floor); }
+.lb-art img, .lb-art svg { width: 100%; display: block; }
+.lb-tier { font: var(--t-2xs) var(--mono); letter-spacing: var(--ls-wider); color: var(--lime-faint); text-transform: uppercase; }
+.lb-desc { font-size: var(--t-sm); color: var(--lime-mid); }
+.lb-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 16px; }
+.lb-close {
+  position: absolute; top: 12px; right: 12px;
+  width: 32px; height: 32px; padding: 0;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: transparent; color: var(--lime-low); cursor: pointer;
+}
+.lb-close:hover { color: var(--lime); border-color: var(--seal); }
+
+.rv-cards { display: flex; flex-wrap: wrap; gap: 16px; justify-content: center; }
+.rv-card { width: 200px; display: grid; gap: 8px; }
+.rv-img { border-radius: 3px; overflow: hidden; background: var(--cut-floor); }
+.rv-img img, .rv-img svg { width: 100%; display: block; }
+.rv-cap { font: var(--t-2xs) var(--mono); color: var(--lime-faint); text-align: center; }
+/* 开图弹层的题头。它是标题，不是标题上方的标签 —— 后者是 craft floor 硬禁的 eyebrow */
+.rv-title {
+  margin: 0 0 var(--s5); text-align: center;
+  font: 900 var(--t-xl)/1.3 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.rv-verdict { margin-top: 14px; text-align: center; font-size: var(--t-sm); color: var(--lime-mid); }
+
+.mn-head { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; margin-bottom: 20px; }
+.mn-sec { margin-bottom: 26px; }
+.mn-sechead {
+  margin: 0 0 12px;
+  font: 900 var(--t-xl)/1.3 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.glossary, .faq { display: grid; gap: 1px; }
+.glossary div, .qa {
+  padding: 12px 14px; background: var(--sunk-2);
+  font-size: var(--t-sm);
+}
+.glossary b, .qa b { display: block; margin-bottom: 5px; color: var(--lime); font-weight: 600; }
+.qa kbd {
+  padding: 2px 6px; border: 1px solid var(--rule-strong); border-radius: 2px;
+  font: var(--t-2xs) var(--mono); color: var(--lime);
+}
+
+/* ═════════════════════════════════════════ 藏品页 */
+
+.tokenpage { max-width: 1120px; }
+.tk { display: grid; grid-template-columns: minmax(0, 460px) minmax(0, 1fr); gap: 44px; }
+@media (max-width: 900px) { .tk { grid-template-columns: 1fr; gap: 28px; } }
+
+/*
+ * 藏品是**你带走的那一份** —— 一张拓片。
+ * 所以它装裱在纸上：石是公共的墙，纸是你从墙上拓下来、拿回家的那一张。
+ * 整站只有这里和首页那块干版是纸，这个反差本身就是"它归你了"。
+ */
+/*
+ * 藏品本身已经是一张拓片（纸底、题记写在纸边上），所以这里**不再套一层装裱纸** ——
+ * 纸压纸是两层白打架，读者分不清哪一层才是藏品。
+ * 只留落影：那张纸浮在墙前面，光从左上来，影子落在右下。
+ */
+.tk-frame {
+  position: relative;
+  border-radius: var(--r-slab);
+  overflow: hidden;
+  box-shadow: var(--slab);
+}
+.tk-frame img, .tk-frame svg {
+  display: block; width: 100%;
+  border-radius: var(--r-cut);
+  background: var(--cut-floor);
+}
+/* 入藏印。盖在纸上的那一方朱砂：它记录一件已经发生、撤不回来的事 */
+.tk-stamp {
+  position: absolute; right: 26px; top: 26px; margin: 0; z-index: 2;
+  padding: 6px 11px;
+  border-radius: var(--r-cut);
+  background: var(--seal); color: var(--paper);
+  box-shadow: inset 0 0 0 1.5px var(--seal-deep);
+  font: var(--t-2xs)/1 var(--mono); letter-spacing: var(--ls-wide);
+}
+.tk-nav { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-top: 12px; }
+.tk-pos { font: var(--t-xs) var(--mono); color: var(--lime-faint); }
+
+.tk-title {
+  margin: 0 0 6px;
+  font: 900 var(--t-3xl)/1.15 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.tk-sub { margin: 0 0 4px; font: var(--t-xs) var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); }
+.tk-kind { display: flex; gap: 8px; align-items: baseline; margin: 0 0 18px; font: var(--t-xs) var(--mono); }
+.tk-kind span { color: var(--lime-faint); letter-spacing: var(--ls-wide); }
+.tk-kind b { color: var(--lime); font-weight: 400; }
+.tk-desc { font-size: var(--t-sm); color: var(--lime-mid); max-width: 44em; }
+
+.traits { display: flex; flex-wrap: wrap; gap: 8px; margin: 18px 0; }
+.trait {
+  display: grid; gap: 3px; padding: 8px 12px;
+  border: 1px solid var(--rule); border-radius: 3px;
+  background: var(--sunk-2);
+}
+.trait span { font: var(--t-3xs) var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); text-transform: uppercase; }
+.trait b { font: var(--t-sm) var(--sans); color: var(--lime); font-weight: 400; }
+
+.tk-facts { display: grid; gap: 0; margin: 18px 0; }
+.tk-facts > div {
+  display: flex; justify-content: space-between; gap: 16px;
+  padding: 9px 0; border-bottom: 1px solid var(--rule);
+  font-size: var(--t-sm);
+}
+.tk-facts span { color: var(--lime-low); }
+.tk-facts b { color: var(--lime); font-weight: 400; font-family: var(--mono); font-size: var(--t-xs); }
+
+.tk-sec { margin: 26px 0; padding-top: 20px; border-top: 1px solid var(--rule); }
+.tk-sec h3 {
+  margin: 0 0 6px;
+  /* 20 而不是 17：小节标题和正文 14 之间要有能看出来的台阶。
+     1.2 倍的差在中文上几乎看不见，读者只会觉得"这一整块都是正文" */
+  font: 900 var(--t-xl)/1.3 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.tk-actions { display: flex; flex-wrap: wrap; gap: 9px; margin-top: 20px; }
+.cardprev { border: 1px solid var(--rule); border-radius: 3px; overflow: hidden; background: var(--cut-floor); }
+/*
+ * 分享卡是**内联 SVG**（要能立刻改题刻再重绘），不是 <img>。
+ * 只写 img/canvas 的话，SVG 会按它自己的 1200×630 固有尺寸缩在容器里，
+ * 上下留出两条黑边 —— 预览里那两条黑边不是设计，是漏掉的一条规则。
+ */
+.cardprev > svg { width: 100%; height: auto; display: block; }
+.cardprev img, .cardprev canvas { width: 100%; display: block; }
+
+/* ═════════════════════════════════════════ 观星者页 */
+
+.kp-hero { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: 26px; align-items: start; }
+@media (max-width: 820px) { .kp-hero { grid-template-columns: 1fr; } }
+.kp-title {
+  margin: 0 0 6px;
+  font: 900 var(--t-3xl)/1.15 var(--carve); letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.kp-latin { margin: 0 0 10px; font: var(--t-xs) var(--mono); letter-spacing: var(--ls-wider); color: var(--lime-faint); }
+.kp-addr { font: var(--t-sm) var(--mono); color: var(--lime-low); word-break: break-all; }
+/* 这一组在 kp-hero 里是并排的一列，不需要上下边线；
+   但去掉边线的同时把 padding 也清成 0，数字就会贴死在容器边上 */
+.kp-stats { border: 0; padding: var(--s2) 0; margin: 0; }
+
+.kp-words { display: grid; gap: 1px; }
+.kp-word { padding: 13px 15px; background: var(--sunk-2); }
+.kp-wordmeta { margin: 0 0 5px; font: var(--t-3xs) var(--mono); letter-spacing: var(--ls-wide); color: var(--lime-faint); }
+.kp-word p { margin: 0; color: var(--lime); font-size: var(--t-sm); }
+
+/* ═════════════════════════════════════════ 空状态 / 骨架 / 轻提示 */
+
+/*
+ * 只命中块级的空状态。
+ * 不加 p 限定的话，图例里那个 <i class="dot empty">（空席的色块）
+ * 也会吃到这里的 padding，被撑成一个 51×66 的大黑方块。
+ */
+p.empty, .empty-state {
+  padding: 28px 20px; text-align: center;
+  font-size: var(--t-sm); color: var(--lime-faint);
+}
+
+/*
+ * 骨架条：不是闪光扫过去的那种。
+ * 仪器在等读数的时候，显示的是一格空刻度，不是动画。
+ */
+.sk:empty::before, .skel {
+  content: ""; display: inline-block;
+  width: 2.2em; height: .8em; border-radius: 2px;
+  background: var(--rule);
+}
+
+.toast {
+  position: fixed; left: 50%; bottom: 26px; z-index: 60;
+  transform: translateX(-50%);
+  max-width: min(560px, calc(100vw - 32px));
+  padding: 12px 18px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--stone-deep); color: var(--lime);
+  font-size: var(--t-sm);
+}
+.toast.bad { border-color: var(--seal); }
+.toast.ok { border-color: var(--rule-strong); }
+
+/* ═════════════════════════════════════════ 无障碍 */
+
+.skip {
+  position: absolute; left: -9999px; z-index: 80;
+  padding: 10px 16px; background: var(--seal); color: var(--stone-deep);
+  font: var(--t-sm) var(--sans); border-radius: 3px;
+}
+.skip:focus { left: 16px; top: 16px; }
+
+/* ═════════════════════════════════════════ 状态：这些类以前都没有样子 */
+
+/* 题刻超长。计数从"还能刻 N 字"翻成一句话，颜色也得跟着变 */
+.carvecount.over { color: var(--seal); }
+
+/*
+ * 还没解锁的铭刻卡：画面压暗、角标退色。
+ * 不遮、不打叉 —— 你看得见那件东西，只是还没资格拿。
+ */
+.premier-card.locked .premier-art { opacity: .5; }
+.premier-card.locked .badge.premier { color: var(--lime-faint); border-color: var(--rule-strong); }
+
+/* 拾到的那一下：画面被灯扫一遍。900ms，和 JS 里的计时一致 */
+@keyframes flash-lit {
+  0%   { box-shadow: 0 0 0 0 var(--seal-wash); }
+  30%  { box-shadow: 0 0 0 3px var(--seal-wash); }
+  100% { box-shadow: 0 0 0 0 oklch(0.700 0.175 34 / 0); }
+}
+.art.flash { animation: flash-lit 900ms ease-out; }
+@media (prefers-reduced-motion: reduce) { .art.flash { animation: none; } }
+
+/* 开出高档次时，弹层的边变成安全灯红。只改一道边，不放礼花 */
+.reveal.rare .rv-panel { border-color: var(--rule-seal); }
+
+/*
+ * 控制台。它是一台仪器的走纸，不是聊天记录：
+ * 时间戳等宽靠左钉死，正文跟在后面，出事的那几行左边亮一道红。
+ */
+.log {
+  max-height: 260px; overflow: auto;
+  font: var(--t-2xs)/1.9 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-low);
+}
+.log .row {
+  display: grid; grid-template-columns: 64px minmax(0, 1fr); gap: 12px;
+  padding: 3px 0 3px 10px;
+  border-left: 1px solid transparent;
+}
+.log .row .t { color: var(--lime-faint); }
+.log .row .m { overflow-wrap: anywhere; }
+/*
+ * 三种行的区别不能只靠颜色：整套系统只有一种饱和色，
+ * 拿它同时表示"成功"和"出事"，两件事就长得一模一样了。
+ * 所以：办成了是白边，出大事（拾到 / 刻上）是红边，出错的那一行额外挂一个感叹号。
+ */
+.log .row.ok  { border-left-color: var(--rule-strong); color: var(--lime-mid); }
+.log .row.hot { border-left-color: var(--seal); color: var(--lime); }
+.log .row.bad { border-left-color: var(--seal); color: var(--lime); }
+.log .row.bad .t::after { content: " !"; color: var(--seal); }
+.log a { color: var(--seal); }
+
+/* ═════════════════════════════════════════ 问一句 */
+
+/*
+ * 断开钱包之前的那一问。
+ * 它借灯箱那一套底板，但只有两个按钮、没有插图 ——
+ * 一句问话不需要布景。默认焦点落在"留下"上：
+ * 回车不该把人送出去。
+ */
+.ask {
+  position: fixed; inset: 0; z-index: 50;
+  display: grid; place-items: center; padding: 24px;
+}
+.ask-backdrop { position: absolute; inset: 0; background: var(--sunk-3); }
+.ask-panel {
+  position: relative; z-index: 1;
+  width: min(420px, 100%); padding: 26px;
+  border: 1px solid var(--rule-strong); border-radius: 3px;
+  background: var(--stone-deep);
+}
+.ask-title {
+  margin: 0 0 10px;
+  font: 900 var(--t-xl)/1.3 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+/* 问一句的正文允许换行：确认落刀时要把用户写的那句原样摊开给他看 */
+.ask-body {
+  margin: 0 0 22px; font-size: var(--t-sm); color: var(--lime-mid);
+  white-space: pre-line; line-height: 1.8;
+}
+
+/* 已经题过的那一任：不再给输入框，给刻好的字。
+   朱砂那道边是"这里已经落过印"的意思，和名录里认领过的刻位是同一个记号。 */
+.carve-done {
+  border-left: 2px solid var(--seal);
+  padding: 2px 0 2px 14px;
+}
+.carve-done-head {
+  margin: 0 0 8px;
+  font: var(--t-2xs)/1 var(--mono); letter-spacing: var(--ls-wider);
+  color: var(--lime-faint);
+}
+.carve-done-words {
+  margin: 0 0 10px;
+  font-family: var(--carve); font-weight: 700;
+  font-size: var(--t-lg); line-height: 1.75; letter-spacing: var(--ls-carve);
+  color: var(--lime);
+}
+.carve-done-note {
+  margin: 0; font-size: var(--t-xs); line-height: 1.9; color: var(--lime-faint);
+}
+.ask-row { display: flex; justify-content: flex-end; gap: 10px; }
+/* 走人的那个按钮才是红的：红标记"这一下有后果" */
+.ask-yes { border-color: var(--seal); color: var(--seal); }
+.ask-yes:hover { background: var(--seal-wash); }
+
+/* ═════════════════════════════════════════ 结语与落款 */
+
+/*
+ * 这一页的最后一句话。
+ * 全页只有这一块是居中的 —— 前面全是左对齐的工作面板，
+ * 居中在这里是语气的转折：仪器读完了，剩下的是一句承诺。
+ */
+.creed {
+  position: relative;
+  /* 720 而不是 40em：这句承诺要能在一行里说完，
+     被父容器挤成"…还在，你 / 刻的那行字…"就断在了最不该断的地方 */
+  max-width: 720px; margin: 72px auto 0; padding-top: 58px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+}
+/*
+ * 垂下来的那道光。台名就是这个意思，全站只画这一次。
+ * 它从上面那条分隔线上落下来，末端有个落点 —— 光是有去处的。
+ */
+.creedmark {
+  position: absolute; left: 50%; top: 0; margin: 0;
+  width: 1px; height: 38px;
+  background: linear-gradient(180deg, transparent, var(--seal));
+}
+.creedmark::after {
+  content: ""; position: absolute; left: -1.5px; bottom: -2px;
+  width: 4px; height: 4px; border-radius: 50%;
+  background: var(--seal);
+}
+.creedtext {
+  max-width: 30em; margin: 0 auto 22px;
+  font-size: var(--t-sm); line-height: 2.1;
+  color: var(--lime-low);
+}
+/* 承诺本身。它是这一页最大的一句中文，所以它得是刻出来的黑体重字 */
+.creedline {
+  margin: 0 auto;
+  font: 900 var(--t-3xl)/1.45 var(--carve);
+  letter-spacing: var(--ls-carve);
+  color: var(--lime);
+  text-wrap: balance;
+}
+@media (max-width: 700px) {
+  .creed { margin-top: 48px; padding-top: 46px; }
+  .creedline { font-size: var(--t-2xl); }
+}
+
+/*
+ * 落款。它接着结语往下走，所以也居中、也收在同一个宽度里 ——
+ * 一段居中的承诺配一行贴着左边的地址，会读成两件不相干的事。
+ */
+footer {
+  max-width: 720px; margin: 56px auto 0; padding-top: 20px;
+  border-top: 1px solid var(--rule);
+  text-align: center;
+  font: var(--t-2xs)/2 var(--mono); letter-spacing: var(--ls-wide);
+  color: var(--lime-faint);
+}
+footer p { margin: 0; }
+footer code { color: var(--lime-low); }
+footer #netname { margin-left: 6px; }
+footer a { margin-left: 10px; color: var(--seal); text-decoration: none; }
+footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
+
+/* ═════════════════════════════════════════ 中文排版细节 */
+
+/* 中文正文不该被浏览器的西文断词规则切开 */
+p, li, dd, .lede, .sub { word-break: normal; overflow-wrap: break-word; }
+/* 地址、哈希这类没有空格的长串必须能断 */
+code, .kp-addr, .addrlink { overflow-wrap: anywhere; }

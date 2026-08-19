@@ -1,0 +1,486 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>观星台 · 垂光台</title>
+<link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="canonical" href="http://127.0.0.1:8080/observatory.html" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<meta name="theme-color" content="#0b0f0e" />
+<meta name="description" content="宇宙正在熄灭。垂光台是最后一座仍在运转的观星台：星屑 2048 枚免费拾取，星座 88 个付费铭刻，每个钱包只能刻一个。" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="垂光台 · The Last Observatory" />
+<meta property="og:description" content="星屑 2048 枚，免费拾取；星座 88 个，每个钱包只能刻一个，所以最多只会有 88 个人在壁面上留下名字。" />
+<meta property="og:image" content="http://127.0.0.1:8080/metadata/images/constellation/60.svg" />
+<meta property="og:url" content="http://127.0.0.1:8080/observatory.html" />
+<meta name="twitter:image" content="http://127.0.0.1:8080/metadata/images/constellation/60.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<link rel="stylesheet" href="tokens.css?v=44" />
+<link rel="stylesheet" href="styles.css?v=61" />
+</head>
+<body>
+<!--
+  THESIS: 这是圆顶里的作业台，不是一张 mint 页。天不再随滚动变 ——
+  镜筒已经停在 60°，页面变成一台观测台面板加一块工作底板。
+  OWN-WORLD: 与首页同一套令牌：按仰角排的地、抬头才出现的星、一条安全灯红作为唯一饱和色；
+  读数是等宽大字，中文标题是自托管黑体重字；面板只用一道边确定层次。
+  STORY: 访客先看清还剩多少、自己在穹顶上的哪个位置，然后拾星屑、铭刻、题刻。
+  FIRST VIEWPORT: 品牌与状态读数条在上，穹顶从首屏开始可见；表达不得盖过任务。
+  FORM: 抬头（The Last Light）；沿用 seed key 734ac0f0 的骨架。
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+
+<a class="skip" href="#dome">跳到穹顶</a>
+
+<!--
+  仰角牌。首页那根尺在动，因为你在抬头；这里钉死在 60°，因为镜筒已经到位。
+  同一台仪器的两个状态 —— 两页靠它认出是同一次观测。
+-->
+<div id="toast" class="toast" hidden></div>
+
+<div class="wrap">
+
+  <!-- ═══════════════════════════════════════════════ 顶栏 -->
+  <header>
+    <div class="mark">
+      <svg viewBox="0 0 40 40" class="sigil" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="33" height="33" rx="5"/>
+        <path d="M11 29a9 9 0 0 1 18 0"/>
+        <path d="M20 29V20"/>
+        <path d="M9 29h22"/>
+        <path d="M20 7v7" opacity=".55"/>
+        <path d="M16.5 10.5L20 14l3.5-3.5" opacity=".55"/>
+      </svg>
+      <div>
+        <h1>垂光台</h1>
+        <p class="latin">THE LAST OBSERVATORY</p>
+      </div>
+    </div>
+
+    <nav class="nav">
+      <a href="index.html">首页</a>
+      <a href="#dome">穹顶</a>
+      <a href="#inscribe-sec">铭刻</a>
+      <a href="#ember-sec">星屑</a>
+      <a href="#codex">图鉴</a>
+      <a href="#chronicle-sec">纪年</a>
+      <a href="#roster">名录</a>
+      <a href="#rules">守则</a>
+      <a href="#" id="openmanual">手册</a>
+    </nav>
+
+    <div class="headright">
+      <div id="phasechip" class="chip">
+        <span class="pulse"></span><span id="phasetext">连接中</span><span id="phasenote" class="phasenote"></span>
+      </div>
+      <a id="myhome" class="btn ghost" href="#" hidden title="我的主页">我的</a>
+      <button id="connect" class="btn ghost">登台</button>
+      <button id="disconnect" class="btn ghost icon" title="离台" hidden>⏻</button>
+    </div>
+  </header>
+
+  <!-- ═══════════════════════════════════════════════ 序章 -->
+  <section class="lore">
+    <p class="lead">宇宙正在熄灭。</p>
+    <p>
+      垂光台是最后一座仍在运转的观星台。我们不试图拯救恒星，只在它们熄灭之前，替它们把最后一束光留存下来。
+    </p>
+    <p class="dim" id="lore-tail">
+      燃料还够 <b>2048</b> 次观测。穹顶上还有 <b>88</b> 个空着的刻位。两个数字都不会再增加了。
+    </p>
+    <div class="hero-note">
+      <span><b>每一次到来，都是一条不可复制的观测记录。</b><br>拾取一枚星屑，或把名字刻在穹顶上。</span>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 统计条 -->
+  <section class="stats">
+    <div class="stat">
+      <span class="sk" id="s-embers">—</span>
+      <i>星屑剩余 / 2048</i>
+    </div>
+    <div class="stat gold">
+      <span class="sk" id="s-seats">—</span>
+      <i>空龛 / 88</i>
+    </div>
+    <div class="stat gold">
+      <span class="sk" id="s-keepers">—</span>
+      <i>已留名的人 · 永远不会超过 88</i>
+    </div>
+    <div class="stat">
+      <span class="sk" id="s-phase">—</span>
+      <i>当前观测阶段</i>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 壁面 -->
+  <section class="card dome" id="dome">
+    <div class="sechead">
+      <div>
+        <h2>穹顶内壁</h2>
+        <p class="sub">88 个刻位凿在四道肋环上：越靠近顶心的环越短，只放得下 12 个。每个刻位都已经预留给一个星座，点任意一个查看。</p>
+      </div>
+      <div class="domecount"><b id="domefilled">0</b><i>/ 88 已铭刻</i></div>
+    </div>
+
+    <div class="domewrap">
+      <svg id="domesvg" class="domesvg" viewBox="0 0 900 348" aria-label="穹顶内壁 · 88 个刻位"></svg>
+      <div id="seattip" class="seattip" hidden></div>
+      <div id="focusbar" class="focusbar" hidden>
+        <span id="focustext">—</span>
+        <button id="focusclear" class="btn ghost small">退出星域 ✕</button>
+      </div>
+    </div>
+
+    <div class="legend">
+      <span><i class="dot empty"></i>空席</span>
+      <span><i class="dot r0"></i><i class="dot r1"></i><i class="dot r2"></i>已铭刻 · 按天区着色</span>
+      <span><i class="dot mine"></i>你的刻位</span>
+      <span class="hint">点任意一席查看 · 同一持有者的刻位会连成星域</span>
+    </div>
+
+    <!-- 席位详情抽屉 -->
+    <div id="seat" class="seat" hidden>
+      <div class="seatleft">
+        <div class="seatart" id="seatart"></div>
+        <button id="seat-zoom" class="btn ghost small full">放大查看 ⤢</button>
+        <a id="seat-page" class="btn ghost small full" href="#">打开刻位页 ↗</a>
+      </div>
+
+      <div class="seatinfo">
+        <div class="seattop">
+          <div>
+            <h3 id="seat-name">—</h3>
+            <p id="seat-ord" class="seatord">—</p>
+          </div>
+          <div id="seat-rank" class="rank" hidden>
+            <b id="seat-title">—</b>
+            <i id="seat-seats">—</i>
+          </div>
+        </div>
+
+        <div class="seatrow"><span>天区</span><b id="seat-region">—</b></div>
+        <div class="seatrow"><span>主星数</span><b id="seat-stars">—</b></div>
+        <div class="seatrow"><span>状态</span><b id="seat-status">—</b></div>
+        <div class="seatrow"><span>现任持有</span><b id="seat-owner">—</b></div>
+        <div class="seatrow"><span>经手</span><b id="seat-hands">—</b></div>
+
+        <p id="seat-note" class="seatnote"></p>
+
+        <!-- 刻痕志 -->
+        <div id="chronicle-wrap" class="chronicle-wrap" hidden>
+          <div class="chronhead">
+            <h4>刻痕志</h4>
+            <span class="chronsub">历任持有者留下的字。前人的一个也擦不掉。</span>
+          </div>
+          <ol id="chronicle" class="chronicle"></ol>
+        </div>
+
+        <!-- 题刻。一任只开一次：题过之后这里换成刻好的字。 -->
+        <div id="carve" class="carve" hidden>
+          <div id="carve-form">
+            <label for="carve-input">你持有这个刻位，可以在志上题一行字。这一任只有一次机会。</label>
+            <textarea id="carve-input" maxlength="46" rows="2"
+                      placeholder="把想留下的话刻在这里…"></textarea>
+            <div class="carverow">
+              <span id="carve-count" class="carvecount">还能刻 46 字</span>
+              <button id="carve-btn" class="btn ghost small">题刻</button>
+            </div>
+          </div>
+          <div id="carve-done" class="carve-done" hidden>
+            <p class="carve-done-head">你这一任的字已经刻上了</p>
+            <p class="carve-done-words" id="carve-done-words"></p>
+            <p class="carve-done-note">改不了也删不了。这个刻位换到下一个人手里时，
+              志上会多出新的一行，那一行归他。</p>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 星座 · PREMIER -->
+  <section class="premier" id="inscribe-sec">
+
+    <div class="card premier-card locked" id="card-constellation">
+
+      <div class="premier-art">
+        <div class="mat">
+        <div class="art zoomable" id="art-constellation" data-zoom-src=""></div>
+        </div>
+        <button class="zoombtn" data-zoom-for="art-constellation">⤢ 放大</button>
+      </div>
+
+      <div class="premier-body">
+        <span class="badge premier">仅 88 席 · 每人限一</span>
+        <h3>铭刻星座</h3>
+        <p class="tiersub">CONSTELLATION · 穹顶上的署名</p>
+        <a id="nextcon" class="nextcon" href="#"></a>
+
+        <p class="tierlore">
+          把拾到的星屑连成图案，署上名字，刻进圆顶内壁。垂光台熄灭之后，这道刻痕还会留在原地。
+        </p>
+
+        <div class="premier-facts">
+          <div><b id="conleft" class="sk">—</b><i>刻位剩余</i></div>
+          <div><b id="price" class="sk">—</b><i>献纳</i></div>
+          <div><b>1</b><i>每个钱包上限</i></div>
+        </div>
+
+        <div id="gate" class="gate">
+          <svg class="ico gateicon" viewBox="0 0 24 24" aria-hidden="true"><path d="M12 4v16M4 12h16"/></svg>
+          <span id="gatetext">先拾一枚星屑，才能铭刻。观星台不认钱，只认你来过。</span>
+        </div>
+
+        <!--
+          两条路，走一条。上面那条付钱，下面那条把攒了七天的星屑交出去 ——
+          两个按钮并排摆，因为它们是**同一件事的两种付法**，不是主次。
+        -->
+        <!--
+          ⚠️ 这两个按钮的**初始文案必须各说各的**。
+          它们本来都写"读取观测台…"，于是链上状态到达之前，
+          页面上就是两个一模一样的按钮中间夹一个"或"——
+          看的人根本不知道在二选一什么。
+          占位态也要能读懂：先写死各自的身份（都是产品的确定事实），
+          等状态到了再由 app.js 换成带数字的版本。
+        -->
+        <div class="twoways">
+          <button id="inscribe" class="btn act gold" disabled>献纳铭刻</button>
+          <div class="orline"><span>或</span></div>
+          <button id="offer" class="btn act offer" disabled>交出 14 枚星屑</button>
+          <p id="offernote" class="offernote">
+            交出 14 枚亲手拾的星屑，换一个刻位。这条路只有 22 席。
+          </p>
+        </div>
+
+        <p class="premier-foot">
+          88 是人类命名过的星座总数。刻满之后，这片天空不再接受新的名字。
+        </p>
+      </div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 星屑 + 铁律 -->
+  <div class="duo">
+
+    <section class="card tier ember" id="ember-sec">
+      <div class="tierhead">
+        <div>
+          <span class="badge free">免费 · 每天 2 枚</span>
+          <h3>拾取星屑</h3>
+          <p class="tiersub">EMBER · 恒星死后飘落的余烬</p>
+        </div>
+        <div class="remain"><b id="emberleft" class="sk">—</b><i>枚剩余</i></div>
+      </div>
+
+      <div class="artwrap">
+        <div class="art zoomable" id="art-ember" data-zoom-src=""></div>
+        <button class="zoombtn" data-zoom-for="art-ember">⤢ 放大</button>
+      </div>
+
+      <p class="tierlore">
+        任何人都能伸手接住。它不值钱，也不能被铭刻。
+        它只证明一件事：那颗恒星熄灭的时候，你在场。
+        <br><br>
+        每一枚落在你手里之前，没有人知道它是哪一种死法。
+      </p>
+
+      <div class="meterline">
+        <div class="meter"><div id="emberfill" class="fill"></div></div>
+        <span id="embermeta" class="metertext">—</span>
+      </div>
+
+      <!-- 你自己的两条额度。全站余量在上面那根尺上，这一行只说你 -->
+      <p id="embertoday" class="embertoday">今日 0 / 2 · 累计 0 / 14</p>
+
+      <div class="qty">
+        <button id="minus" class="btn sq">−</button>
+        <div id="qty" class="qtyval">1</div>
+        <button id="plus" class="btn sq">+</button>
+        <a id="codexhint" class="qtyhint codexhint" href="#">图鉴 0 / 7 已发现</a>
+      </div>
+
+      <button id="claim" class="btn act" disabled>拾取星屑</button>
+    </section>
+
+    <section class="card codex-sec" id="codex">
+      <div class="sechead">
+        <div>
+          <h2>遗迹图鉴</h2>
+          <p class="sub">七种死法，从最慢的到最彻底的。没亲手拾到过的只有轮廓 —— 概率写出来是数据，遮起来才是动机。</p>
+        </div>
+        <span id="codexcount" class="domecount"><b>0</b><i>/ 7 已发现</i></span>
+      </div>
+      <div id="codexlist" class="codexlist"></div>
+    </section>
+  </div>
+
+  <!-- ═══════════════════════════════════════════════ 观测纪年 -->
+  <section class="card chronosec" id="chronicle-sec">
+    <div class="sechead">
+      <div>
+        <h2>观测纪年</h2>
+        <p class="sub">垂光台是怎么走到今天的。</p>
+      </div>
+    </div>
+    <ol id="timeline" class="timeline"></ol>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 名录 -->
+  <section class="card roster" id="roster">
+    <div class="sechead">
+      <div>
+        <h2>守夜人名录</h2>
+        <p class="sub">在穹顶上留过名的人。按持有的刻位数排。</p>
+      </div>
+      <span id="rostercount" class="domecount"></span>
+    </div>
+    <div id="rosterlist" class="rosterlist"><p class="empty">读取名录…</p></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 链上动态 -->
+  <section class="card feedbox">
+    <div class="sechead">
+      <div>
+        <h2>观测记录</h2>
+        <p class="sub">链上真实发生的事，按时间倒序。</p>
+      </div>
+      <span class="pulse" aria-hidden="true"></span>
+    </div>
+
+    <div id="feedfilter" class="segmented" role="tablist" aria-label="记录类型">
+      <button class="seg on" data-kind="all" role="tab" aria-selected="true">全部</button>
+      <button class="seg" data-kind="con" role="tab" aria-selected="false">铭刻</button>
+      <button class="seg" data-kind="carve" role="tab" aria-selected="false">题刻</button>
+      <button class="seg" data-kind="pass" role="tab" aria-selected="false">易主</button>
+      <button class="seg" data-kind="emb" role="tab" aria-selected="false">星屑</button>
+    </div>
+
+    <div id="feed" class="feed"><p class="empty">读取链上记录…</p></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 我的记录 -->
+  <section id="vault-wrap" class="card vault" hidden>
+    <div class="sechead">
+      <div>
+        <h2>你的记录</h2>
+        <p class="sub">点任意一件放大查看。</p>
+      </div>
+      <span id="vaultcount" class="domecount"></span>
+    </div>
+    <div id="vault" class="vaultgrid"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 控制台日志 -->
+  <section class="card logbox">
+    <div class="sechead"><div><h2>控制台</h2></div></div>
+    <div id="log" class="log"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 守则 -->
+  <section class="card rules" id="rules">
+    <div class="sechead">
+      <div>
+        <h2>观测守则</h2>
+        <p class="sub">进台之前该知道的事。</p>
+      </div>
+    </div>
+    <div id="faq" class="faq"></div>
+  </section>
+
+  <!-- ═══════════════════════════════════════════════ 结语 -->
+  <section class="creed">
+    <p class="creedmark"></p>
+    <p class="creedtext">
+      垂光台不承诺回报，不承诺路线图，不承诺下一个系列。<br>
+      它只承诺一件事：
+    </p>
+    <p class="creedline">只要这条链还在，你刻的那行字就还在。</p>
+  </section>
+
+  <footer>
+    <p>
+      垂光台 <code id="addr">—</code>
+      <span id="netname">—</span>
+      <a id="explorer" href="#" target="_blank" rel="noopener" hidden>浏览器 ↗</a>
+    </p>
+    <p class="tiny">星屑 2048 · 星座 88 · 数字不会再增加</p>
+  </footer>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 观测手册 -->
+<div id="manual" class="manual" hidden>
+  <div class="mn-backdrop" data-mnclose></div>
+  <aside class="mn-panel">
+    <div class="mn-head">
+      <div>
+        <h2>观测手册</h2>
+      </div>
+      <button class="btn ghost icon" data-mnclose>✕</button>
+    </div>
+
+    <div class="mn-body">
+      <section class="mn-sec">
+        <h3>称号阶梯</h3>
+        <p class="mn-note">
+          亲手铭刻每人只有一次。多出来的刻位只能从二级市场收。
+          所以高阶称号本身就是一段收购史。
+        </p>
+        <div id="ranklist" class="ranklist"></div>
+      </section>
+
+      <section class="mn-sec">
+        <h3>术语</h3>
+        <dl id="glossary" class="glossary"></dl>
+      </section>
+    </div>
+  </aside>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 开图 -->
+<div id="reveal" class="reveal" hidden>
+  <div class="rv-backdrop" data-rvclose></div>
+  <div class="rv-panel">
+    <h3 class="rv-title">垂光台捕捉到</h3>
+    <div id="rv-cards" class="rv-cards"></div>
+    <p id="rv-verdict" class="rv-verdict"></p>
+    <button class="btn ghost small" data-rvclose>收进囊中</button>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 问一句 -->
+<div id="ask" class="ask" hidden>
+  <div class="ask-backdrop" data-askno></div>
+  <div class="ask-panel" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <h3 class="ask-title" id="ask-title">—</h3>
+    <p class="ask-body" id="ask-body"></p>
+    <div class="ask-row">
+      <button id="ask-no" class="btn ghost small" data-askno>留下</button>
+      <button id="ask-yes" class="btn ghost small ask-yes">离台</button>
+    </div>
+  </div>
+</div>
+
+<!-- ═══════════════════════════════════════════════ 灯箱 -->
+<div id="lightbox" class="lightbox" hidden>
+  <div class="lb-backdrop" data-close></div>
+  <div class="lb-panel">
+    <button class="lb-close" data-close>✕</button>
+    <div class="lb-art" id="lb-art"></div>
+    <div class="lb-side">
+      <p class="lb-tier" id="lb-tier">—</p>
+      <h3 id="lb-name">—</h3>
+      <p class="lb-desc" id="lb-desc"></p>
+      <div class="traits" id="lb-traits"></div>
+      <div class="lb-actions">
+        <a id="lb-page" class="btn ghost small" href="#">打开独立页 ↗</a>
+        <a id="lb-open" class="btn ghost small" href="#" target="_blank" rel="noopener" hidden>区块浏览器 ↗</a>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script type="module" src="app.js?v=63"></script>
+</body>
+</html>

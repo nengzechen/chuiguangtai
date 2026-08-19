@@ -1,0 +1,144 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>垂光台 · 刻位</title>
+<link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<meta name="theme-color" content="#0b0f0e" />
+<link rel="stylesheet" href="tokens.css?v=44" />
+<link rel="stylesheet" href="styles.css?v=61" />
+</head>
+<body>
+
+
+<div class="wrap tokenpage">
+
+  <header>
+    <a class="mark" href="index.html">
+      <svg viewBox="0 0 40 40" class="sigil" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="33" height="33" rx="5"/>
+        <path d="M11 29a9 9 0 0 1 18 0"/>
+        <path d="M20 29V20"/>
+        <path d="M9 29h22"/>
+        <path d="M20 7v7" opacity=".55"/>
+        <path d="M16.5 10.5L20 14l3.5-3.5" opacity=".55"/>
+      </svg>
+      <div>
+        <h1>垂光台</h1>
+        <p class="latin">THE LAST OBSERVATORY</p>
+      </div>
+    </a>
+    <div class="headright">
+      <a class="btn ghost" href="observatory.html">← 回观星台</a>
+      <button id="share" class="btn ghost">复制链接</button>
+    </div>
+  </header>
+
+  <main class="tk">
+    <!-- 左：画作 -->
+    <div class="tk-left">
+      <div class="tk-frame">
+        <div class="mat">
+          <div class="art" id="tk-art"></div>
+        </div>
+        <!-- 入藏标记：调查队钉在龛上的那块牌子，不是火漆印 -->
+        <p class="tk-stamp" id="tk-seal" hidden>已铭刻</p>
+      </div>
+
+      <nav class="tk-nav">
+        <a id="tk-prev" class="btn ghost small">← 上一席</a>
+        <span id="tk-pos" class="tk-pos">—</span>
+        <a id="tk-next" class="btn ghost small">下一席 →</a>
+      </nav>
+    </div>
+
+    <!-- 右：档案 -->
+    <div class="tk-right">
+      <h2 class="tk-title" id="tk-name">—</h2>
+      <p class="tk-sub" id="tk-sub">—</p>
+      <p class="tk-kind"><span>层级</span><b id="tk-tier">—</b></p>
+
+      <div id="tk-rank" class="rank tk-rank" hidden>
+        <b id="tk-title2">—</b>
+        <i id="tk-seats">—</i>
+      </div>
+
+      <p class="tk-desc" id="tk-desc"></p>
+
+      <div class="traits" id="tk-traits"></div>
+
+      <div class="tk-facts">
+        <div><span>状态</span><b id="tk-status">—</b></div>
+        <div><span>现任持有</span><b id="tk-owner">—</b></div>
+        <div><span>经手</span><b id="tk-hands">—</b></div>
+        <div><span>链上编号</span><b id="tk-id">—</b></div>
+      </div>
+
+      <!-- 刻痕志 -->
+      <section id="tk-chron-wrap" class="tk-sec" hidden>
+        <h3>刻痕志</h3>
+        <p class="mn-note">历任持有者留下的字。前人的一个也擦不掉。</p>
+        <ol id="tk-chron" class="chronicle"></ol>
+      </section>
+
+      <!-- 题刻。一任只开一次：题过之后这里换成刻好的字。 -->
+      <div id="tk-carve" class="carve" hidden>
+        <div id="tk-carve-form">
+          <label for="tk-carve-input">你持有这个刻位，可以在志上题一行字。这一任只有一次机会。</label>
+          <textarea id="tk-carve-input" maxlength="46" rows="2" placeholder="把想留下的话刻在这里…"></textarea>
+          <div class="carverow">
+            <span id="tk-carve-count" class="carvecount">还能刻 46 字</span>
+            <button id="tk-carve-btn" class="btn ghost small">题刻</button>
+          </div>
+        </div>
+        <div id="tk-carve-done" class="carve-done" hidden>
+          <p class="carve-done-head">你这一任的字已经刻上了</p>
+          <p class="carve-done-words" id="tk-carve-done-words"></p>
+          <p class="carve-done-note">改不了也删不了。这一席换到下一个人手里时，
+            志上会多出新的一行，那一行归他。</p>
+        </div>
+      </div>
+
+      <section id="tk-cardwrap" class="tk-sec" hidden>
+        <h3>分享卡</h3>
+        <p class="mn-note">1200×630，带题刻。会被转发的从来不是「我 mint 了一个 NFT」。</p>
+        <div id="tk-cardprev" class="cardprev"></div>
+        <button id="tk-card" class="btn ghost small" style="margin-top:12px">下载分享卡</button>
+      </section>
+
+      <div class="tk-actions">
+        <button id="tk-connect" class="btn ghost small">登台</button>
+        <a id="tk-explorer" class="btn ghost small" target="_blank" rel="noopener" hidden>区块浏览器 ↗</a>
+      </div>
+
+      <p class="tk-log" id="tk-log"></p>
+    </div>
+  </main>
+
+  <footer>
+    <p>垂光台 <code id="addr">—</code> <span id="netname">—</span></p>
+    <p class="tiny">星屑 2048 · 星座 88 · 数字不会再增加</p>
+  </footer>
+</div>
+
+<!-- 问一句。落刀不可逆，按下去之前得让人完整看一眼自己要留的那句话。 -->
+<div id="ask" class="ask" hidden>
+  <div class="ask-backdrop" data-askno></div>
+  <div class="ask-panel" role="dialog" aria-modal="true" aria-labelledby="ask-title">
+    <h3 class="ask-title" id="ask-title">—</h3>
+    <p class="ask-body" id="ask-body"></p>
+    <div class="ask-row">
+      <button id="ask-no" class="btn ghost small" data-askno>再想想</button>
+      <button id="ask-yes" class="btn ghost small ask-yes">落刀</button>
+    </div>
+  </div>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="token.js?v=29"></script>
+</body>
+</html>

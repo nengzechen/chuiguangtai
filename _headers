@@ -1,0 +1,28 @@
+# Cloudflare Pages 的响应头配置。GitHub Pages 忽略这个文件，无害。
+
+/*
+  X-Content-Type-Options: nosniff
+  Referrer-Policy: strict-origin-when-cross-origin
+  X-Frame-Options: DENY
+  # 这一页只连自己的域名和 Robinhood 链的 RPC。
+  # 钱包是通过 window.ethereum 注入的，不走网络请求，所以不用为它开口子。
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://rpc.mainnet.chain.robinhood.com https://rpc.testnet.chain.robinhood.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+
+# 带版本号的静态资源可以长期缓存
+/fonts/*
+  Cache-Control: public, max-age=31536000, immutable
+/vendor/*
+  Cache-Control: public, max-age=31536000, immutable
+/metadata/images/*
+  Cache-Control: public, max-age=31536000, immutable
+
+# 元数据 JSON：OpenSea 会反复来读，给一天
+/metadata/*
+  Cache-Control: public, max-age=86400
+  Access-Control-Allow-Origin: *
+
+# HTML 不缓存，改了要立刻生效
+/*.html
+  Cache-Control: public, max-age=0, must-revalidate
+/
+  Cache-Control: public, max-age=0, must-revalidate

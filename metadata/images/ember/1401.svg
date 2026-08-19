@@ -1,0 +1,126 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 500 500" width="500" height="500">
+  <defs>
+    <radialGradient id="sky1401" cx="50%" cy="50%" r="72%">
+      <stop offset="0%" stop-color="#2C3F6E" stop-opacity="0.32"/>
+      <stop offset="100%" stop-color="#080C18" stop-opacity="1"/>
+    </radialGradient>
+    <radialGradient id="glow1401">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.55"/>
+      <stop offset="28%" stop-color="#BBD2F5" stop-opacity="0.26"/>
+      <stop offset="62%" stop-color="#2C3F6E" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#2C3F6E" stop-opacity="0"/>
+    </radialGradient>
+    <!--
+      主体：临边昏暗。恒星的边比心暗，因为你在边上看到的是更外、更冷的一层。
+      白心收在 10% 以内 —— 放到 18% 时，A/F 这些本来就近白的光谱型
+      会把整颗星糊成一个白球，光谱型这个特征就白设了。
+    -->
+    <radialGradient id="body1401" cx="42%" cy="38%" r="74%">
+      <stop offset="0%" stop-color="#FFFFFF"/>
+      <stop offset="10%" stop-color="#FFFFFF"/>
+      <stop offset="44%" stop-color="#BBD2F5"/>
+      <stop offset="100%" stop-color="#2C3F6E"/>
+    </radialGradient>
+    <!-- 光束的衰减：以星为心，所以两道束共用一条渐变，且与角度无关 -->
+    <radialGradient id="beam1401" cx="250" cy="250" r="425"
+                    gradientUnits="userSpaceOnUse">
+      <stop offset="0%" stop-color="#FFFFFF" stop-opacity="0.85"/>
+      <stop offset="22%" stop-color="#FFFFFF" stop-opacity="0.4"/>
+      <stop offset="60%" stop-color="#BBD2F5" stop-opacity="0.12"/>
+      <stop offset="100%" stop-color="#BBD2F5" stop-opacity="0"/>
+    </radialGradient>
+    <linearGradient id="disk1401" x1="0" y1="0" x2="1" y2="0">
+      <stop offset="0%" stop-color="#BBD2F5"/>
+      <stop offset="35%" stop-color="#FFFFFF"/>
+      <stop offset="65%" stop-color="#FFFFFF"/>
+      <stop offset="100%" stop-color="#BBD2F5"/>
+    </linearGradient>
+  </defs>
+
+  <!-- 满幅。没有留白边、没有题记条 —— 画面就是画面 -->
+  <rect width="500" height="500" fill="#080C18"/>
+  <rect width="500" height="500" fill="url(#sky1401)"/>
+  <circle cx="465.87" cy="383.67" r="0.92" fill="#FFFFFF" opacity="0.35"/><circle cx="389.24" cy="441.83" r="0.93" fill="#FFFFFF" opacity="0.35"/><circle cx="32.83" cy="349.76" r="2.14" fill="#FFFFFF" opacity="0.75"/><path d="M21.06 349.76 L32.83 348.69 L44.599999999999994 349.76 L32.83 350.83Z"
+      fill="#FFFFFF" opacity="0.4"/>
+    <path d="M32.83 337.99 L33.9 349.76 L32.83 361.53 L31.76 349.76Z"
+      fill="#FFFFFF" opacity="0.4"/><circle cx="431.58" cy="108.14" r="0.4" fill="#FFFFFF" opacity="0.18"/><circle cx="117.88" cy="194.71" r="0.41" fill="#FFFFFF" opacity="0.18"/><circle cx="324.79" cy="282.18" r="0.43" fill="#BBD2F5" opacity="0.19"/><circle cx="444.47" cy="212.26" r="1.34" fill="#FFFFFF" opacity="0.49"/><circle cx="147.12" cy="114.18" r="2.1" fill="#FFFFFF" opacity="0.74"/><path d="M135.57 114.18 L147.12 113.13 L158.67000000000002 114.18 L147.12 115.23Z"
+      fill="#FFFFFF" opacity="0.4"/>
+    <path d="M147.12 102.63000000000001 L148.17 114.18 L147.12 125.73 L146.07 114.18Z"
+      fill="#FFFFFF" opacity="0.4"/><circle cx="428.59" cy="393.62" r="0.4" fill="#FFFFFF" opacity="0.18"/><circle cx="224.6" cy="338.54" r="1.01" fill="#FFFFFF" opacity="0.38"/><circle cx="459.7" cy="170.88" r="2.06" fill="#FFFFFF" opacity="0.72"/><path d="M448.37 170.88 L459.7 169.85 L471.03 170.88 L459.7 171.91Z"
+      fill="#FFFFFF" opacity="0.4"/>
+    <path d="M459.7 159.54999999999998 L460.73 170.88 L459.7 182.21 L458.67 170.88Z"
+      fill="#FFFFFF" opacity="0.4"/><circle cx="161.55" cy="214.99" r="1.08" fill="#FFFFFF" opacity="0.4"/><circle cx="157.37" cy="356.63" r="1.41" fill="#BBD2F5" opacity="0.51"/><circle cx="20.56" cy="74.96" r="1.48" fill="#FFFFFF" opacity="0.53"/><circle cx="474.31" cy="183.52" r="1.62" fill="#FFFFFF" opacity="0.58"/><circle cx="277.18" cy="93.37" r="0.71" fill="#FFFFFF" opacity="0.28"/><circle cx="447.27" cy="198.38" r="0.7" fill="#FFFFFF" opacity="0.28"/><circle cx="214.35" cy="153" r="0.4" fill="#FFFFFF" opacity="0.18"/><circle cx="400.82" cy="39.27" r="1.98" fill="#FFFFFF" opacity="0.7"/><circle cx="455.5" cy="53.12" r="0.85" fill="#FFFFFF" opacity="0.33"/><circle cx="295.45" cy="129.62" r="0.41" fill="#FFFFFF" opacity="0.18"/><circle cx="479.5" cy="25.46" r="2.08" fill="#FFFFFF" opacity="0.73"/><path d="M468.06 25.46 L479.5 24.42 L490.94 25.46 L479.5 26.5Z"
+      fill="#FFFFFF" opacity="0.4"/>
+    <path d="M479.5 14.020000000000001 L480.54 25.46 L479.5 36.9 L478.46 25.46Z"
+      fill="#FFFFFF" opacity="0.4"/><circle cx="27.49" cy="53.9" r="1.16" fill="#FFFFFF" opacity="0.43"/><circle cx="496.33" cy="377.77" r="0.79" fill="#FFFFFF" opacity="0.31"/><circle cx="91.73" cy="184.11" r="0.87" fill="#FFFFFF" opacity="0.33"/><circle cx="281.33" cy="306.15" r="1.45" fill="#FFFFFF" opacity="0.52"/><circle cx="451.99" cy="76.17" r="0.65" fill="#FFFFFF" opacity="0.26"/><circle cx="67.84" cy="242.52" r="0.41" fill="#FFFFFF" opacity="0.18"/><circle cx="480.24" cy="459.95" r="1.25" fill="#BBD2F5" opacity="0.46"/><circle cx="375.87" cy="177.71" r="0.84" fill="#BBD2F5" opacity="0.32"/><circle cx="345.87" cy="91.94" r="0.78" fill="#FFFFFF" opacity="0.3"/><circle cx="447.46" cy="24.74" r="0.68" fill="#FFFFFF" opacity="0.27"/><circle cx="5.45" cy="85.1" r="0.66" fill="#FFFFFF" opacity="0.26"/><circle cx="464.48" cy="78.73" r="0.71" fill="#FFFFFF" opacity="0.28"/>
+
+  <!-- 辉光垫在主体下面：先有光，才有轮廓 -->
+  <circle cx="250" cy="250" r="310.57" fill="url(#glow1401)"/>
+  <circle cx="250" cy="250" r="163.46" fill="url(#body1401)"/><ellipse cx="311.3" cy="188.95" rx="22.87" ry="14.03"
+      transform="rotate(45.12 311.3 188.95)"
+      fill="#FFFFFF" opacity="0.09"/><ellipse cx="223.65" cy="301.42" rx="18.16" ry="12.47"
+      transform="rotate(207.13 223.65 301.42)"
+      fill="#FFFFFF" opacity="0.12"/><ellipse cx="193.25" cy="155.25" rx="30.48" ry="21.21"
+      transform="rotate(329.08 193.25 155.25)"
+      fill="#FFFFFF" opacity="0.06"/><ellipse cx="232.91" cy="197.16" rx="20.06" ry="8.6"
+      transform="rotate(342.07 232.91 197.16)"
+      fill="#FFFFFF" opacity="0.09"/><ellipse cx="254.2" cy="145.41" rx="34.59" ry="15.95"
+      transform="rotate(2.3 254.2 145.41)"
+      fill="#FFFFFF" opacity="0.12"/><ellipse cx="370.11" cy="294.39" rx="23.27" ry="10.52"
+      transform="rotate(110.28 370.11 294.39)"
+      fill="#FFFFFF" opacity="0.09"/><ellipse cx="178.07" cy="170.69" rx="17.77" ry="10.48"
+      transform="rotate(317.79 178.07 170.69)"
+      fill="#FFFFFF" opacity="0.1"/><ellipse cx="178.86" cy="318.57" rx="16.57" ry="9.72"
+      transform="rotate(226.05 178.86 318.57)"
+      fill="#FFFFFF" opacity="0.09"/><ellipse cx="326.58" cy="220.24" rx="17.61" ry="8.2"
+      transform="rotate(68.76 326.58 220.24)"
+      fill="#FFFFFF" opacity="0.08"/><ellipse cx="344.54" cy="275.99" rx="39.1" ry="24.19"
+      transform="rotate(105.37 344.54 275.99)"
+      fill="#FFFFFF" opacity="0.08"/><ellipse cx="116.65" cy="293.16" rx="23.59" ry="14.1"
+      transform="rotate(252.07 116.65 293.16)"
+      fill="#FFFFFF" opacity="0.11"/><ellipse cx="221.9" cy="251.49" rx="36.3" ry="20.65"
+      transform="rotate(266.97 221.9 251.49)"
+      fill="#FFFFFF" opacity="0.11"/><ellipse cx="311.51" cy="368.94" rx="17.25" ry="10.8"
+      transform="rotate(152.65 311.51 368.94)"
+      fill="#FFFFFF" opacity="0.11"/><ellipse cx="287.78" cy="172.42" rx="38.13" ry="21.43"
+      transform="rotate(25.97 287.78 172.42)"
+      fill="#FFFFFF" opacity="0.06"/><ellipse cx="372.38" cy="267.69" rx="16.72" ry="9.76"
+      transform="rotate(98.22 372.38 267.69)"
+      fill="#FFFFFF" opacity="0.04"/><ellipse cx="309.31" cy="141.55" rx="26.13" ry="10.86"
+      transform="rotate(28.67 309.31 141.55)"
+      fill="#FFFFFF" opacity="0.1"/><ellipse cx="357.3" cy="286.22" rx="18.8" ry="10.05"
+      transform="rotate(108.65 357.3 286.22)"
+      fill="#FFFFFF" opacity="0.06"/><ellipse cx="323.26" cy="324.46" rx="25.05" ry="16.98"
+      transform="rotate(135.47 323.26 324.46)"
+      fill="#FFFFFF" opacity="0.08"/><ellipse cx="352.02" cy="201.87" rx="30.18" ry="20.04"
+      transform="rotate(64.74 352.02 201.87)"
+      fill="#FFFFFF" opacity="0.05"/><ellipse cx="173.99" cy="327.5" rx="24.54" ry="10.94"
+      transform="rotate(224.45 173.99 327.5)"
+      fill="#FFFFFF" opacity="0.04"/><ellipse cx="330.23" cy="207.22" rx="32.45" ry="13.27"
+      transform="rotate(61.93 330.23 207.22)"
+      fill="#FFFFFF" opacity="0.06"/><ellipse cx="253.4" cy="280.32" rx="26.57" ry="15.39"
+      transform="rotate(173.61 253.4 280.32)"
+      fill="#FFFFFF" opacity="0.04"/><ellipse cx="233.41" cy="162.59" rx="35.81" ry="14.95"
+      transform="rotate(349.25 233.41 162.59)"
+      fill="#FFFFFF" opacity="0.08"/><ellipse cx="223.18" cy="191.84" rx="22.03" ry="13.68"
+      transform="rotate(335.24 223.18 191.84)"
+      fill="#FFFFFF" opacity="0.05"/><ellipse cx="237.29" cy="363.19" rx="25.13" ry="14.44"
+      transform="rotate(186.41 237.29 363.19)"
+      fill="#FFFFFF" opacity="0.07"/><ellipse cx="286.06" cy="146.97" rx="33.93" ry="14.18"
+      transform="rotate(19.29 286.06 146.97)"
+      fill="#FFFFFF" opacity="0.09"/><circle cx="250" cy="250" r="161.83" fill="none"
+    stroke="#FFFFFF" stroke-width="8.17" opacity="0.30"/><circle cx="250" cy="250" r="166.73" fill="none"
+    stroke="#FFFFFF" stroke-width="1.4" opacity="0.55"/><path d="M103.69 184.78 Q76.13 123.56 187.12 102.67" fill="#FFFFFF"
+      opacity="0.19"/><path d="M103.69 184.78 Q76.13 123.56 187.12 102.67" fill="none"
+      stroke="#FFFFFF" stroke-width="2.34"
+      stroke-linecap="round" opacity="0.51"/><path d="M388.3 330.83 Q407.59 393.41 324.08 392.03" fill="#FFFFFF"
+      opacity="0.21"/><path d="M388.3 330.83 Q407.59 393.41 324.08 392.03" fill="none"
+      stroke="#FFFFFF" stroke-width="2.53"
+      stroke-linecap="round" opacity="0.61"/><path d="M101.85 310.93 Q7.79 294.26 93.83 214.34" fill="#FFFFFF"
+      opacity="0.13"/><path d="M101.85 310.93 Q7.79 294.26 93.83 214.34" fill="none"
+      stroke="#FFFFFF" stroke-width="1.92"
+      stroke-linecap="round" opacity="0.66"/><path d="M122.81 347.39 Q36.29 351.67 92.9 281.29" fill="#FFFFFF"
+      opacity="0.15"/><path d="M122.81 347.39 Q36.29 351.67 92.9 281.29" fill="none"
+      stroke="#FFFFFF" stroke-width="3.5"
+      stroke-linecap="round" opacity="0.73"/>
+</svg>
