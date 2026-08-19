@@ -1,0 +1,10 @@
+node_modules/
+artifacts/
+cache/
+
+# 私钥在这儿。永远不要提交。
+.env
+.env.local
+
+# deployment.json **要**提交 —— 里面只有合约地址、chainId 和 ABI，全是公开信息，
+# 而页面没有它就读不到链上任何东西。以前把它忽略掉，站一发出去就是一片空白。

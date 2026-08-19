@@ -1,0 +1,35 @@
+# 把 web/ 发到 GitHub Pages。
+#
+# 站是纯静态的，没有构建步骤 —— 这个 workflow 只做一件事：
+# 把 web/ 目录原样上传。所以它跑得很快，也没什么可坏的。
+name: Deploy to Pages
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+
+# 同时只跑一个部署，但排队中的不取消 —— 免得刚推的改动被后一个顶掉
+concurrency:
+  group: pages
+  cancel-in-progress: false
+
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v3
+        with:
+          path: web
+      - id: deployment
+        uses: actions/deploy-pages@v4

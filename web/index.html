@@ -1,0 +1,390 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>垂光台 · 最后一座观星台</title>
+<meta name="description" content="宇宙正在熄灭。垂光台还在记录每一颗恒星最后的光。星屑 2048 枚，穹顶 88 席 —— 两个数字都只会往下走。" />
+<meta property="og:type" content="website" />
+<meta property="og:title" content="垂光台 · 最后一座观星台" />
+<meta property="og:description" content="穹顶上有 88 个位置。每个钱包只能占一个 —— 所以最多只会有 88 个人在这里留下名字。" />
+<meta property="og:image" content="http://127.0.0.1:8080/metadata/images/constellation/60.svg" />
+<meta property="og:url" content="http://127.0.0.1:8080/" />
+<meta name="twitter:image" content="http://127.0.0.1:8080/metadata/images/constellation/60.svg" />
+<meta name="twitter:card" content="summary_large_image" />
+<meta name="theme-color" content="#0b0f0e" />
+<link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="canonical" href="http://127.0.0.1:8080/" />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<link rel="stylesheet" href="tokens.css?v=44" />
+<link rel="stylesheet" href="landing.css?v=67" />
+</head>
+<body class="wallside">
+<!--
+  THESIS: 这一页是一面刻满名字的墙，你沿着它走。它拒绝品类默认答案（发光星点的宇宙底、
+  居中大倒计时、霓虹强调），也拒绝上一版自己的答案（纵向抬头、六段天色、安全灯红）。
+  OWN-WORLD: 两种材料。石 —— 磨光的冷青灰花岗岩，是公共的、不可改的那一面；
+  纸 —— 拓片的骨白，是你带走的那一份。名字是凿进去的凹槽，光永远从左上掠过，
+  上唇亮、槽底黑。唯一的饱和色是朱砂，只标记已认领的刻位和能按下去的东西，
+  而主行动本身就是一枚印。中文是碑刻的明体，等宽只给真实测量值。
+  STORY: 访客走过一面墙，看见 88 个位置里已经刻掉了多少，明白这里的门槛不是钱，
+  是你亲手来过七天；他决定要不要在最后那些空槽里占一个。
+  FIRST VIEWPORT: 整幅墙面占据视口，四道横列（12/20/26/30）铺开 88 个凹槽，
+  空的看得见槽底、刻过的亮着一张小星图；左上一行碑刻体主标题压在墙上，
+  下方一条读数带（星屑余量 / 空槽 / 阶段）；主行动是一枚朱砂印。
+  FORM: 名录墙（The Name Wall），我的首选方向，第 1 位；seed key f0f93fb7。
+  FINISH: unreviewed and undocumented is unfinished; this build ends with the finish review, the verdict, and DESIGN.md
+-->
+
+<svg width="0" height="0" style="position:absolute" aria-hidden="true">
+  <defs>
+    <symbol id="i-ember" viewBox="0 0 24 24">
+      <path d="M4 5.5l7 7"/>
+      <circle cx="14.5" cy="16" r="3.2"/>
+      <path d="M7 3.5l3 3M3.5 9l3 3" opacity=".6"/>
+    </symbol>
+    <symbol id="i-aperture" viewBox="0 0 24 24">
+      <circle cx="12" cy="12" r="7.5"/>
+      <path d="M12 2.5v3M12 18.5v3M2.5 12h3M18.5 12h3" opacity=".7"/>
+    </symbol>
+    <symbol id="i-lamp" viewBox="0 0 24 24">
+      <path d="M12 3.5v3M12 17.5v3M4.6 12h3M16.4 12h3M6.9 6.9l2.1 2.1M15 15l2.1 2.1M17.1 6.9L15 9M9 15l-2.1 2.1"/>
+      <circle cx="12" cy="12" r="3.2"/>
+    </symbol>
+  </defs>
+</svg>
+
+
+<a class="skip" href="#wall">跳到墙</a>
+
+<!--
+  板号索引。纪念墙是按板编号的，你沿着墙走，板号一块一块过去。
+  它横在页顶，不是竖在页侧 —— 这一版的阅读方向是**走过去**，不是抬头。
+  当前板亮朱砂，走过的板留着刻痕色，没到的板是空槽。
+-->
+<nav class="panels" id="panels" aria-label="墙面板号">
+  <ol class="panel-list" id="panel-list"></ol>
+</nav>
+
+<header class="deck">
+  <a class="mark" href="index.html" aria-label="垂光台 · 首页">
+    <svg class="sigil" viewBox="0 0 40 40" aria-hidden="true">
+      <rect x="3.5" y="3.5" width="33" height="33" rx="5"/>
+      <path d="M11 29a9 9 0 0 1 18 0"/>
+      <path d="M20 29V20"/>
+      <path d="M9 29h22"/>
+      <path d="M20 7v7" opacity=".55"/>
+      <path d="M16.5 10.5L20 14l3.5-3.5" opacity=".55"/>
+    </svg>
+    <span class="mark-txt">
+      <b>垂光台</b>
+      <i>THE LAST OBSERVATORY</i>
+    </span>
+  </a>
+  <nav class="deck-nav">
+    <a href="#how">怎么参与</a>
+    <a href="#pair">两种东西</a>
+    <a href="#rules">三条规矩</a>
+    <a href="#log">纪年</a>
+  </nav>
+  <a class="btn btn-line" href="observatory.html">进入观星台</a>
+</header>
+
+<main>
+
+  <!-- ══════════════════════════════ 板 01 · 墙 -->
+  <section class="stage wall-stage" id="wall">
+    <!--
+      整面墙就在首屏。四道横列 12 / 20 / 26 / 30 铺开 88 个凹槽 ——
+      这是穹顶内壁展开之后的样子，分环一个没动。
+      空的看得见槽底，刻过的亮着一张小星图。
+      访客第一眼看见的不是一段介绍，是**还剩多少个空位**。
+    -->
+    <div class="stage-in hero">
+     <div class="hero-copy">
+
+      <h1 class="headline">宇宙正在熄灭。<br><em>我们还在记录。</em></h1>
+
+      <!--
+        一句话说清这是什么。
+        标题负责让人停下来，这一句负责让人看懂 —— 少了它，
+        一个第一次来的人读完首屏还是不知道自己在看什么。
+      -->
+      <p class="whatis">
+        <b>垂光台是一个链上藏品项目。</b>
+        两层：<b>星屑</b> 2048 枚，免费，每天最多拾 2 枚；<b>星座</b> 88 个，
+        每个钱包只能刻 1 个 —— 付 0.0088 ETH，或者交出你亲手拾满的 14 枚星屑。
+        刻下之后，你可以在自己那个刻位上留一行字 —— 谁也改不掉，包括我们。
+      </p>
+
+      <!--
+        观测台读数。三个数里有两个只会往下走，那正是这一页要讲的事。
+        它不是"大数字＋小标签"的英雄区模板：这是仪器面板本身，
+        每个数都带单位、带量程、钉在同一条基线上。
+      -->
+      <div class="computer" role="group" aria-label="当前读数">
+        <div class="read">
+          <span class="read-k">星屑余量</span>
+          <b class="read-v n" id="r-embers">—</b>
+          <span class="read-u">/ 2048 枚</span>
+        </div>
+        <div class="read">
+          <span class="read-k">空位</span>
+          <b class="read-v n" id="r-open">—</b>
+          <span class="read-u">/ 88 个</span>
+        </div>
+        <div class="read read-alt">
+          <span class="read-k">观测阶段</span>
+          <b class="read-v read-word" id="r-phase">连接中</b>
+          <span class="read-u" id="r-phase-note">只进不退</span>
+        </div>
+      </div>
+
+      <div class="actions">
+        <a class="btn btn-fill" href="observatory.html">
+          <svg class="ico" aria-hidden="true"><use href="#i-ember"/></svg>免费拾一枚星屑
+        </a>
+        <a class="btn btn-line" href="#how">
+          <svg class="ico" aria-hidden="true"><use href="#i-aperture"/></svg>怎么参与
+        </a>
+      </div>
+
+      <p class="hint">拾星屑不收钱，只花网络手续费，每天 2 枚。</p>
+     </div>
+
+     <!-- 墙就在标题下面，第一屏之内。访客第一眼看见的是还剩多少空位 -->
+    <div class="wall-face" id="wall-face">
+      <div class="courses" id="ledges" role="group" aria-label="穹顶展开的 88 个刻位"></div>
+    </div>
+
+    <p class="tally">
+      <span><b class="n" id="w-taken">—</b> 已刻</span>
+      <span><b class="n" id="w-open">—</b> 空槽</span>
+      <span class="tally-note">每个钱包只能占一个。空了就是空的，不会再多出来。</span>
+    </p>
+
+
+     <div class="hero-rest">
+      <p class="standfirst">
+        名字来自设定：垂光台是最后一座仍在运转的观星台，它不拯救恒星，
+        只在每一颗熄灭之前把最后的光记下来。上面那面墙是它的名录：
+        88 个位置刻在四道横列上，你沿着它走过去，就看得见还剩多少。
+      </p>
+
+     </div>
+
+     <!--
+       一块真的干版夹在片盒里。首屏就要看见"你能拿到的是什么"，
+       而不是先看一段介绍再翻到下面找图。
+     -->
+     <figure class="hero-spec">
+       <div class="plate">
+         <div class="plate-art" id="hero-art" aria-hidden="true"></div>
+         <span class="plate-no">PLATE 10060</span>
+       </div>
+       <figcaption>
+         <b>猎户座</b>
+         <span>Orion · 编号 10060</span>
+         <span class="hero-spec-d">第 60 位 · 列 Ⅳ · <em id="hero-spec-state">—</em></span>
+       </figcaption>
+     </figure>
+    </div>
+  </section>
+
+
+  <!-- ══════════════════════════════ 06° 怎么参与 -->
+  <section class="stage" id="how">
+    <div class="stage-in">
+      <h2 class="h-sec">怎么参与</h2>
+      <p class="lede">三步。前两步不花钱，第三步是唯一收费的地方。</p>
+
+      <ol class="steps">
+        <li>
+          <span class="step-n n">1</span>
+          <div>
+            <h3>连接钱包</h3>
+            <p>进观星台，右上角连接。只读地址，不会动你的任何资产。</p>
+            <a class="btn btn-line btn-sm" href="observatory.html">进观星台</a>
+          </div>
+        </li>
+        <li>
+          <span class="step-n n">2</span>
+          <div>
+            <h3>免费拾星屑</h3>
+            <p>每天 2 枚，一个钱包总共 14 枚，全站共 2048 枚，只花网络手续费。
+               <strong>必须亲手拾过，才有资格铭刻</strong> —— 从别人手里买来的不算。</p>
+            <!-- 七天是这一步真实的成本。写成一句话读者会滑过去，摆成七格他会数 -->
+            <p class="seven">
+              <span class="seven-slots" aria-hidden="true">
+                <i></i><i></i><i></i><i></i><i></i><i></i><i></i>
+              </span>
+              <span class="seven-cap">七天 · 每天 2 枚</span>
+            </p>
+            <a class="btn btn-line btn-sm" href="observatory.html#ember-sec">去拾星屑</a>
+          </div>
+        </li>
+        <li>
+          <span class="step-n n">3</span>
+          <div>
+            <h3>铭刻一个刻位，留下一行字</h3>
+            <p>全站 88 个，每个钱包只能刻 1 个。两条路：付 <b>0.0088 ETH</b>，
+               或者把亲手拾满的 <b>14 枚星屑</b>交出去（这条路只有 22 席）。
+               刻位上有一本刻痕志，你写的那行字会永久留在链上，转手也擦不掉。</p>
+            <a class="btn btn-line btn-sm" href="observatory.html#inscribe-sec">去铭刻</a>
+          </div>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 12° 消光带 -->
+  <section class="stage" id="pair">
+    <div class="stage-in">
+      <h2 class="h-sec">台上只有两种东西</h2>
+
+      <!--
+        两栏共用一套行标签，读数落在同一条基线上。
+        这一段的意义就是横着读一行就能看出差别，两张各自独立的卡片做不到。
+        「另一条路」那一行星屑是空的，空格本身就是信息。
+      -->
+      <div class="pair">
+        <article class="pair-head">
+          <div class="obs-fig" id="fig-ember" aria-hidden="true"></div>
+          <h3>星屑<i>Ember · 编号 0001–2048</i></h3>
+          <p>
+            一颗恒星熄灭的时候，最后那点光还要走很久才到这里。
+            接住它不要钱，任何人都能伸手，但一天只接得住两枚。
+            它不值钱，它记的是你来过几次。
+          </p>
+        </article>
+
+        <article class="pair-head">
+          <div class="obs-fig" id="fig-con" aria-hidden="true"></div>
+          <h3>星座<i>Constellation · 编号 10001–10088</i></h3>
+          <p>
+            把接到的星屑连成图案，署上名字，刻进穹顶内壁的凹龛。
+            人类命名过的星座只有 88 个。刻满之后，这座穹顶不再接受新的名字。
+          </p>
+        </article>
+
+        <dl class="pair-spec">
+          <div class="pair-row">
+            <dt>总量</dt>
+            <dd class="n">2048</dd>
+            <dd class="n">88</dd>
+          </div>
+          <div class="pair-row">
+            <dt>献纳</dt>
+            <dd>免费 · 只花手续费</dd>
+            <dd class="n">0.0088 ETH</dd>
+          </div>
+          <div class="pair-row">
+            <dt>另一条路</dt>
+            <dd class="none">没有</dd>
+            <dd class="n">14 枚星屑 · 22 席</dd>
+          </div>
+          <div class="pair-row">
+            <dt>每人上限</dt>
+            <dd class="n">14 <span class="unit">· 每天 2</span></dd>
+            <dd class="n">1</dd>
+          </div>
+        </dl>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 30° 测光界线 -->
+  <section class="stage cutline" id="line">
+    <div class="stage-in">
+      <h2 class="h-sec">30° 以下不算数</h2>
+      <p class="lede">
+        观测台有一条老规矩：低于 30° 的天不做测光。
+        那个高度上，光要斜穿过太厚的大气才到镜筒里，被吃掉多少谁也算不准。
+      </p>
+
+      <!--
+        全站唯一那条硬边长在这里，把该收钱的和不该收钱的真的分开。
+        线以上是要付的，线以下是不收钱的。
+      -->
+      <div class="cut">
+        <div class="cut-side">
+          <span class="cut-tag">30° 以上 · 要付</span>
+          <p>铭刻一个刻位。两条路：付 <b>0.0088 ETH</b>，
+             或者交出亲手拾满的 <b>14 枚星屑</b>（这条路只有 22 席）。</p>
+        </div>
+
+        <p class="cut-line lamp-target">观星台不认钱，只认你来过。</p>
+
+        <div class="cut-side">
+          <span class="cut-tag">30° 以下 · 不收钱</span>
+          <p>拾星屑。每天 2 枚，全站 2048 枚，只花网络手续费。
+             门槛记的是你<strong>亲手拾取</strong>过多少枚，不是你手里现在有多少 ——
+             从别人那儿买来的不算数。这条规矩在最底层，谁也绕不过去。</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 45° 暗适应 -->
+  <section class="stage" id="rules">
+    <div class="stage-in">
+      <h2 class="h-sec">三条不会改的规矩</h2>
+      <p class="lede">
+        下面三条不是承诺，是合约里根本没有开关的地方。
+        它们并列，没有先后 —— 所以不给它们编号，只标每一条凭什么改不掉。
+        <span class="aside">改不掉的东西就是这样：它不因为你没在看就松动了。</span>
+      </p>
+
+      <ol class="rules">
+        <li class="lamp-target" tabindex="0">
+          <span class="rule-mark">刻死</span>
+          <h3>数字不会再增加</h3>
+          <p>2048 和 88 是刻死的。没有增发的开关，也没有留给「第二季」的后门。连我们自己想加也加不了。</p>
+        </li>
+        <li class="lamp-target" tabindex="0">
+          <span class="rule-mark">单向</span>
+          <h3>观测窗口只往前走</h3>
+          <p>闭台 → 拾屑 → 铭刻，三个阶段只能顺着来，不能倒回去。宣告过的窗口，收不回。</p>
+        </li>
+        <li class="lamp-target" tabindex="0">
+          <span class="rule-mark">只追加</span>
+          <h3>前人的字擦不掉</h3>
+          <p>每个刻位上，你只能写属于你的那一行。刻位转手多少次，最初那个人留下的字都还在原处 —— 不是「我们承诺不改」，是根本没有能改它的办法。</p>
+        </li>
+      </ol>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════ 90° 天顶 -->
+  <section class="stage" id="log">
+    <div class="stage-in">
+      <h2 class="h-sec">观测纪年</h2>
+      <p class="lede">走到墙的尽头。下面是垂光台自己的值班日志，六条，从元年到今日 —— 只追加，从不覆盖。</p>
+      <div class="logbook" id="logbook"></div>
+    </div>
+  </section>
+
+</main>
+
+<!-- 收台：镜筒放平，颜色一路回到消光带的高度 -->
+<footer class="stage stow">
+  <div class="stage-in">
+    <p class="vow lamp-target">只要这条链还在，你刻的那行字就还在。</p>
+    <p class="lede">垂光台不承诺回报，不承诺路线图，不承诺下一个系列。</p>
+    <p class="actions">
+      <a class="btn btn-fill" href="observatory.html">
+        <svg class="ico" aria-hidden="true"><use href="#i-aperture"/></svg>进入观星台
+      </a>
+    </p>
+    <p class="colophon">
+      <span>垂光台 · THE LAST OBSERVATORY</span>
+      <span><a href="observatory.html">观星台</a> · <a href="token.html?id=10060">猎户座</a> · 星屑 2048 · 星座 88</span>
+      <span class="credit">88 个刻位对应国际天文联合会命名的 88 个星座</span>
+    </p>
+  </div>
+</footer>
+
+<script type="module" src="landing.js?v=67"></script>
+</body>
+</html>

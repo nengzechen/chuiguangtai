@@ -1,0 +1,115 @@
+<!doctype html>
+<html lang="zh">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>观星者 · 垂光台</title>
+<link rel="preload" href="fonts/jetbrains-mono-400.woff2" as="font" type="font/woff2" crossorigin />
+<link rel="icon" href="favicon.svg" type="image/svg+xml" />
+<link rel="icon" href="favicon.ico" sizes="32x32" />
+<meta name="theme-color" content="#0b0f0e" />
+<link rel="stylesheet" href="tokens.css?v=44" />
+<link rel="stylesheet" href="styles.css?v=60" />
+</head>
+<body>
+
+
+<div class="wrap tokenpage">
+
+  <header>
+    <a class="mark" href="index.html">
+      <svg viewBox="0 0 40 40" class="sigil" aria-hidden="true">
+        <rect x="3.5" y="3.5" width="33" height="33" rx="5"/>
+        <path d="M11 29a9 9 0 0 1 18 0"/>
+        <path d="M20 29V20"/>
+        <path d="M9 29h22"/>
+        <path d="M20 7v7" opacity=".55"/>
+        <path d="M16.5 10.5L20 14l3.5-3.5" opacity=".55"/>
+      </svg>
+      <div>
+        <h1>垂光台</h1>
+        <p class="latin">THE LAST OBSERVATORY</p>
+      </div>
+    </a>
+    <div class="headright">
+      <a class="btn ghost" href="observatory.html">← 回观星台</a>
+      <button id="share" class="btn ghost">复制链接</button>
+    </div>
+  </header>
+
+  <main id="kp-main">
+    <!-- 身份 -->
+    <section class="kp-hero card">
+      <div class="kp-id">
+        <h2 class="kp-title" id="kp-rank">—</h2>
+        <p class="kp-latin" id="kp-latin">—</p>
+        <code class="kp-addr" id="kp-addr">—</code>
+      </div>
+
+      <div class="kp-stats">
+        <div><b id="kp-seats" class="sk">—</b><i>持有刻位</i></div>
+        <div><b id="kp-embers" class="sk">—</b><i>亲手拾取的星屑</i></div>
+        <div><b id="kp-words" class="sk">—</b><i>留下的题刻</i></div>
+        <div><b id="kp-first" class="sk">—</b><i>最早的刻位</i></div>
+      </div>
+    </section>
+
+    <!-- 星域 -->
+    <section class="card" id="kp-domewrap">
+      <div class="sechead">
+        <div>
+          <h2>这个人在穹顶上的位置</h2>
+          <p class="sub" id="kp-domesub">—</p>
+        </div>
+      </div>
+      <svg id="kp-dome" class="domesvg" viewBox="0 0 900 348" aria-label="该持有者的星域"></svg>
+    </section>
+
+    <!-- 题刻 -->
+    <section class="card" id="kp-wordswrap" hidden>
+      <div class="sechead">
+        <div>
+          <h2>留在刻痕志上的话</h2>
+          <p class="sub">只显示这个地址亲手写在内壁上的那些行。</p>
+        </div>
+      </div>
+      <div id="kp-wordslist" class="kp-words"></div>
+    </section>
+
+    <!-- 藏品 -->
+    <section class="card" id="kp-vaultwrap" hidden>
+      <div class="sechead">
+        <div>
+          <h2>名下的记录</h2>
+        </div>
+        <span id="kp-vaultcount" class="domecount"></span>
+      </div>
+      <div id="kp-vault" class="vaultgrid"></div>
+    </section>
+
+    <!-- 分享卡 -->
+    <section class="card" id="kp-cardwrap" hidden>
+      <div class="sechead">
+        <div>
+          <h2>观星者名片</h2>
+          <p class="sub">1200×630，可以直接发出去。</p>
+        </div>
+      </div>
+      <div id="kp-cardprev" class="cardprev"></div>
+      <button id="kp-card" class="btn ghost small" style="margin-top:14px">下载名片</button>
+    </section>
+
+    <p class="tk-log" id="kp-log"></p>
+  </main>
+
+  <footer>
+    <p>垂光台 <code id="addr">—</code> <span id="netname">—</span></p>
+    <p class="tiny">星屑 2048 · 星座 88 · 数字不会再增加</p>
+  </footer>
+</div>
+
+<div id="toast" class="toast" hidden></div>
+
+<script type="module" src="keeper.js?v=28"></script>
+</body>
+</html>

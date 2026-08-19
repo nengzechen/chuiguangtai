@@ -1,0 +1,399 @@
+{
+  "schemaVersion": 2,
+  "generatedAt": "2026-08-15T04:55:33Z",
+  "title": "Design System: 名录墙 The Name Wall",
+  "extensions": {
+    "colorMeta": {
+      "stone": {
+        "role": "neutral",
+        "displayName": "石 Stone（墙面）",
+        "canonical": "oklch(0.190 0.007 158)",
+        "purpose": "整页唯一的地。墙不会因为你走到哪一段就换石头"
+      },
+      "stone-deep": {
+        "role": "neutral",
+        "displayName": "石 · 板缝",
+        "canonical": "oklch(0.135 0.006 158)",
+        "purpose": "段与段之间那道凿进去的横缝"
+      },
+      "stone-lit": {
+        "role": "neutral",
+        "displayName": "石 · 受光面",
+        "canonical": "oklch(0.262 0.009 158)",
+        "purpose": "阳光从左上掠到的那一面"
+      },
+      "stone-face": {
+        "role": "neutral",
+        "displayName": "石 · 抬起来的板",
+        "canonical": "oklch(0.222 0.008 158)",
+        "purpose": "读数条、面板"
+      },
+      "cut-lip": {
+        "role": "neutral",
+        "displayName": "刻 · 上唇",
+        "canonical": "oklch(0.860 0.008 158)",
+        "purpose": "凹槽被光打亮的上沿。必须和 cut-floor 成对使用"
+      },
+      "cut-floor": {
+        "role": "neutral",
+        "displayName": "刻 · 槽底",
+        "canonical": "oklch(0.105 0.005 158)",
+        "purpose": "凹槽最黑的地方"
+      },
+      "paper": {
+        "role": "neutral",
+        "displayName": "纸 Paper（拓片）",
+        "canonical": "oklch(0.940 0.004 110)",
+        "purpose": "你带走的那一份。冷骨白，不是米黄"
+      },
+      "paper-shade": {
+        "role": "neutral",
+        "displayName": "纸 · 暗面",
+        "canonical": "oklch(0.884 0.005 110)",
+        "purpose": ""
+      },
+      "paper-edge": {
+        "role": "neutral",
+        "displayName": "纸 · 边缘",
+        "canonical": "oklch(0.812 0.006 110)",
+        "purpose": ""
+      },
+      "graphite": {
+        "role": "neutral",
+        "displayName": "石墨 · 正文",
+        "canonical": "oklch(0.270 0.006 250)",
+        "purpose": "纸上的字"
+      },
+      "graphite-mid": {
+        "role": "neutral",
+        "displayName": "石墨 · 次级",
+        "canonical": "oklch(0.430 0.006 250)",
+        "purpose": ""
+      },
+      "graphite-soft": {
+        "role": "neutral",
+        "displayName": "石墨 · 刻度",
+        "canonical": "oklch(0.505 0.006 250)",
+        "purpose": "纸上最暗一级，4.91:1"
+      },
+      "lime": {
+        "role": "neutral",
+        "displayName": "石上 · 名字与读数",
+        "canonical": "oklch(0.965 0.004 158)",
+        "purpose": "16.63:1"
+      },
+      "lime-mid": {
+        "role": "neutral",
+        "displayName": "石上 · 正文",
+        "canonical": "oklch(0.862 0.005 158)",
+        "purpose": "12.17:1"
+      },
+      "lime-low": {
+        "role": "neutral",
+        "displayName": "石上 · 次级说明",
+        "canonical": "oklch(0.760 0.006 158)",
+        "purpose": "8.59:1"
+      },
+      "lime-faint": {
+        "role": "neutral",
+        "displayName": "石上 · 刻度与禁用",
+        "canonical": "oklch(0.672 0.007 158)",
+        "purpose": "6.20:1 —— 前景到此为止，不许再暗"
+      },
+      "seal": {
+        "role": "primary",
+        "displayName": "朱砂 Cinnabar",
+        "canonical": "oklch(0.520 0.172 32)",
+        "purpose": "整套唯一的饱和色。只标记已认领的刻位和能按下去的东西"
+      },
+      "seal-deep": {
+        "role": "primary",
+        "displayName": "朱砂 · 压实",
+        "canonical": "oklch(0.430 0.150 30)",
+        "purpose": "印泥被压实的那一圈边，以及按下去时的底。只做形不做字"
+      },
+      "seal-light": {
+        "role": "primary",
+        "displayName": "朱砂 · 提亮",
+        "canonical": "oklch(0.660 0.165 34)",
+        "purpose": "石面上要承载小字时才用，5.51:1"
+      },
+      "region-n": {
+        "role": "tertiary",
+        "displayName": "天区 · 北天",
+        "canonical": "oklch(0.780 0.052 240)",
+        "purpose": "分类色，不做按钮不做标题"
+      },
+      "region-s": {
+        "role": "tertiary",
+        "displayName": "天区 · 南天",
+        "canonical": "oklch(0.745 0.062 300)",
+        "purpose": "分类色"
+      },
+      "region-e": {
+        "role": "tertiary",
+        "displayName": "天区 · 黄道",
+        "canonical": "oklch(0.800 0.058 108)",
+        "purpose": "分类色"
+      },
+      "ok": {
+        "role": "semantic",
+        "displayName": "状态 · 成立",
+        "canonical": "oklch(0.680 0.105 155)",
+        "purpose": ""
+      }
+    },
+    "typographyMeta": {
+      "display": {
+        "displayName": "Display 首屏标题",
+        "purpose": "只给首屏主标题（72/52/36px 三档）。自托管 Noto Sans SC 900 子集。"
+      },
+      "headline": {
+        "displayName": "Headline 段落标题",
+        "purpose": "段落主标题、藏品名、观星者名。"
+      },
+      "title": {
+        "displayName": "Title 小节标题",
+        "purpose": "卡片与小节标题；20px 起，不与 14px 正文靠得更近。"
+      },
+      "body": {
+        "displayName": "Body 正文",
+        "purpose": "系统无衬线，行长 40–46em。一个字节都不下载。"
+      },
+      "readout": {
+        "displayName": "Readout 读数",
+        "purpose": "观测电脑读数、余量、席位数。tabular-nums。"
+      },
+      "label": {
+        "displayName": "Label 刻度",
+        "purpose": "刻度、单位、地址、编号、图例。等宽 + 宽字距，常配 uppercase。"
+      },
+      "control": {
+        "displayName": "Control 控件文字",
+        "purpose": "按钮、导航、分段控件。"
+      }
+    },
+    "shadows": {
+      "groove": {
+        "displayName": "凹槽 Groove",
+        "purpose": "唯一\"凿进去\"的配方：上唇亮、下沿暗、槽底最黑"
+      },
+      "slab": {
+        "displayName": "抬板 Slab",
+        "purpose": "从墙面抬起来的板，落影在右下。只给纸"
+      }
+    },
+    "motion": [
+      {
+        "name": "ease-lamp",
+        "value": "cubic-bezier(.2, .8, .3, 1)",
+        "purpose": "灯与龛的响应曲线：--signal 回红（240ms）、龛挑起（140ms）。"
+      },
+      {
+        "name": "dur-instant",
+        "value": "120ms",
+        "purpose": "深度尺读数牌跟随（linear）、龛内符号位移。"
+      },
+      {
+        "name": "dur-state",
+        "value": "180ms",
+        "purpose": "按钮与链接的颜色/边框状态切换。"
+      },
+      {
+        "name": "dur-lamp",
+        "value": "240ms",
+        "purpose": "--signal 从死灰过渡回真红。仅此一处编排级时长。"
+      },
+      {
+        "name": "reduced-motion",
+        "value": "@media (prefers-reduced-motion: reduce)",
+        "purpose": "全量关闭：星光只画一帧、深度尺不过渡、龛与按钮无 transition、红色不回来。"
+      }
+    ],
+    "breakpoints": [
+      {
+        "name": "xl",
+        "value": "1340px"
+      },
+      {
+        "name": "lg",
+        "value": "1180px"
+      },
+      {
+        "name": "hero",
+        "value": "1040px"
+      },
+      {
+        "name": "md",
+        "value": "900px"
+      },
+      {
+        "name": "sm",
+        "value": "720px"
+      },
+      {
+        "name": "xs",
+        "value": "560px"
+      }
+    ]
+  },
+  "components": [
+    {
+      "name": "Primary Button 主行动",
+      "kind": "button",
+      "refersTo": "button-primary",
+      "description": "填充青。整页只有一到两个；禁用时必须把填充一并清掉。",
+      "html": "<button class=\"ds-btn ds-btn-primary\">抬头</button>",
+      "css": ".ds-btn { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:14px 20px; border:1px solid var(--thermo, oklch(0.700 0.175 34)); border-radius:3px; font:600 13px/1 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; letter-spacing:.02em; cursor:pointer; transition:background-color .18s, color .18s, border-color .18s; } .ds-btn-primary { background:var(--thermo, oklch(0.700 0.175 34)); color:var(--d90-turn, oklch(0.126 0.013 272)); } .ds-btn-primary:hover:not(:disabled) { background:var(--snow, oklch(0.971 0.007 248)); border-color:var(--snow, oklch(0.971 0.007 248)); } .ds-btn-primary:focus-visible { outline:2px solid var(--thermo, oklch(0.700 0.175 34)); outline-offset:2px; } .ds-btn-primary:active:not(:disabled) { transform:translateY(1px); } .ds-btn-primary:disabled { background:transparent; color:var(--snow-faint, oklch(0.708 0.030 248)); border-color:oklch(0.971 0.007 248 / .28); cursor:not-allowed; }"
+    },
+    {
+      "name": "Line Button 描边按钮",
+      "kind": "button",
+      "refersTo": "button-line",
+      "description": "默认按钮。透明底、青字青边，hover 铺一层薄青。",
+      "html": "<button class=\"ds-btn-line\">看穹顶</button>",
+      "css": ".ds-btn-line { display:inline-flex; align-items:center; justify-content:center; gap:8px; padding:10px 18px; border:1px solid var(--thermo, oklch(0.700 0.175 34)); border-radius:3px; background:transparent; color:var(--thermo, oklch(0.700 0.175 34)); font:13px/1 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; letter-spacing:.02em; cursor:pointer; transition:background-color .18s, color .18s, border-color .18s; } .ds-btn-line:hover { background:oklch(0.803 0.134 204 / .14); } .ds-btn-line:focus-visible { outline:2px solid var(--thermo, oklch(0.700 0.175 34)); outline-offset:2px; } .ds-btn-line:active { transform:translateY(1px); }"
+    },
+    {
+      "name": "Ghost Button 弱按钮",
+      "kind": "button",
+      "refersTo": "button-ghost",
+      "description": "次要动作：灰字灰边，只在 hover 时把字提亮、边变青。",
+      "html": "<button class=\"ds-btn-ghost\">收进囊中</button>",
+      "css": ".ds-btn-ghost { display:inline-flex; align-items:center; gap:8px; padding:10px 18px; border:1px solid oklch(0.971 0.007 248 / .28); border-radius:3px; background:transparent; color:var(--snow-low, oklch(0.782 0.028 246)); font:13px/1 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; letter-spacing:.02em; cursor:pointer; transition:color .18s, border-color .18s; } .ds-btn-ghost:hover { color:var(--snow, oklch(0.971 0.007 248)); border-color:var(--thermo, oklch(0.700 0.175 34)); } .ds-btn-ghost:focus-visible { outline:2px solid var(--thermo, oklch(0.700 0.175 34)); outline-offset:2px; }"
+    },
+    {
+      "name": "Phase Chip 阶段读数",
+      "kind": "chip",
+      "refersTo": "chip-readout",
+      "description": "观测电脑上的一格读数，不是圆角标签。闭台时点与字一起退到最暗一级。",
+      "html": "<span class=\"ds-chip\"><i class=\"ds-chip-pulse\"></i>观测中</span>",
+      "css": ".ds-chip { display:inline-flex; align-items:center; gap:8px; padding:8px 14px; min-width:104px; justify-content:center; border:1px solid oklch(0.971 0.007 248 / .28); border-radius:3px; background:oklch(0.132 0.026 269 / .6); font:11px/1 'JetBrains Mono',ui-monospace,Menlo,monospace; letter-spacing:.02em; color:var(--snow, oklch(0.971 0.007 248)); white-space:nowrap; } .ds-chip-pulse { width:5px; height:5px; border-radius:50%; background:var(--thermo, oklch(0.700 0.175 34)); flex:none; }"
+    },
+    {
+      "name": "Readout Cell 仪表读数格",
+      "kind": "custom",
+      "refersTo": "readout-cell",
+      "description": "共用一个外框、一条基线的读数格；不是统计卡。数字等宽 + tabular-nums。",
+      "html": "<div class=\"ds-readbar\"><div class=\"ds-read\"><i>EMBERS LEFT</i><b>2048</b></div><div class=\"ds-read\"><i>SEATS OPEN</i><b class=\"ds-read-alt\">88</b></div></div>",
+      "css": ".ds-readbar { display:flex; flex-wrap:wrap; align-items:flex-end; border:1px solid oklch(0.971 0.007 248 / .28); border-radius:4px; background:oklch(0.132 0.026 269 / .45); } .ds-read { flex:1 1 auto; min-width:168px; display:grid; gap:4px; padding:18px 20px; border-right:1px solid oklch(0.971 0.007 248 / .13); } .ds-read:last-child { border-right:0; } .ds-read i { font:11px/1 'JetBrains Mono',ui-monospace,Menlo,monospace; font-style:normal; letter-spacing:.08em; text-transform:uppercase; color:var(--snow-faint, oklch(0.708 0.030 248)); } .ds-read b { font:700 36px/1 'JetBrains Mono',ui-monospace,Menlo,monospace; color:var(--snow, oklch(0.971 0.007 248)); font-variant-numeric:tabular-nums; } .ds-read-alt { color:var(--thermo, oklch(0.700 0.175 34)) !important; }"
+    },
+    {
+      "name": "Panel Card 调查底板",
+      "kind": "card",
+      "refersTo": "card-panel",
+      "description": "半透明水层 + 一道 1px 密度线。只用一种层次语言，绝不再叠阴影。",
+      "html": "<section class=\"ds-card\"><h2 class=\"ds-card-h\">观测记录</h2><p class=\"ds-card-p\">链上真实发生的事，按时间倒序。</p></section>",
+      "css": ".ds-card { padding:28px; border:1px solid oklch(0.971 0.007 248 / .13); border-radius:3px; background:oklch(0.132 0.026 269 / .40); } .ds-card-h { margin:0 0 6px; font:900 24px/1.3 'Noto Sans SC Display','PingFang SC',sans-serif; letter-spacing:-.02em; color:var(--snow, oklch(0.971 0.007 248)); } .ds-card-p { margin:0; font:14px/1.7 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; color:var(--snow-low, oklch(0.782 0.028 246)); }"
+    },
+    {
+      "name": "Carve Input 题刻输入",
+      "kind": "input",
+      "refersTo": "input-carve",
+      "description": "更深的水做底；聚焦不画光晕，只把边框转青。",
+      "html": "<label class=\"ds-carve\"><span>刻一行字，永久留在这个刻位上</span><textarea class=\"ds-carve-in\" rows=\"3\" placeholder=\"不超过 64 字\"></textarea></label>",
+      "css": ".ds-carve span { display:block; margin-bottom:9px; font:13px/1.6 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; color:var(--snow-low, oklch(0.782 0.028 246)); } .ds-carve-in { width:100%; padding:12px 14px; border:1px solid oklch(0.971 0.007 248 / .28); border-radius:3px; background:oklch(0.09 0.014 266 / .8); color:var(--snow, oklch(0.971 0.007 248)); font:14px/1.6 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; resize:vertical; } .ds-carve-in::placeholder { color:var(--snow-faint, oklch(0.708 0.030 248)); } .ds-carve-in:focus { outline:none; border-color:var(--thermo, oklch(0.700 0.175 34)); }"
+    },
+    {
+      "name": "Niche 凹龛",
+      "kind": "custom",
+      "refersTo": "niche",
+      "description": "凿进岩石的 26px 凹坑。空的看得见坑底；装了的用天区色；被灯扫到时挑起 2px。",
+      "html": "<div class=\"ds-wall\"><div class=\"ds-niche\"></div><div class=\"ds-niche ds-niche-r0\"></div><div class=\"ds-niche ds-niche-r1\"></div><div class=\"ds-niche ds-niche-r2\"></div><div class=\"ds-niche ds-niche-mine\"></div></div>",
+      "css": ".ds-wall { display:flex; flex-wrap:wrap; gap:5px; padding:20px; border-radius:3px; background:var(--basalt, oklch(0.118 0.014 266)); box-shadow:inset 0 1px 0 oklch(0.971 0.007 248 / .07), inset 0 -40px 60px -30px oklch(0.05 0.01 265 / .9); } .ds-niche { width:26px; height:26px; border-radius:2px; background:linear-gradient(158deg, oklch(0.115 0.017 265) 0%, oklch(0.055 0.009 266) 62%); box-shadow:inset 0 1.5px 0 oklch(0.971 0.007 248 / .16), inset 1.5px 0 0 oklch(0.971 0.007 248 / .09), inset 0 3px 5px oklch(0.03 0.008 266 / .95), inset 0 -1px 0 oklch(0.03 0.008 266 / .8); transition:transform .14s cubic-bezier(.2,.8,.3,1), box-shadow .14s; } .ds-niche-r0 { background:linear-gradient(158deg, oklch(0.400 0.050 246), oklch(0.215 0.032 246) 70%); } .ds-niche-r1 { background:linear-gradient(158deg, oklch(0.365 0.055 291), oklch(0.195 0.034 291) 70%); } .ds-niche-r2 { background:linear-gradient(158deg, oklch(0.405 0.044 100), oklch(0.215 0.028 100) 70%); } .ds-niche-mine { box-shadow:inset 0 0 0 1.5px var(--thermo, oklch(0.700 0.175 34)), inset 0 2px 3px oklch(0.04 0.01 265 / .9); } .ds-niche-r0:hover, .ds-niche-r1:hover, .ds-niche-r2:hover, .ds-niche-r0:focus-visible, .ds-niche-r1:focus-visible, .ds-niche-r2:focus-visible { transform:translateY(-2px); box-shadow:inset 0 0 0 1px oklch(0.971 0.007 248 / .5), 0 5px 12px oklch(0.04 0.01 265 / .8); }"
+    },
+    {
+      "name": "Depth Readout 深度尺读数牌",
+      "kind": "custom",
+      "refersTo": "rail-now",
+      "description": "深度尺上唯一亮着的东西。底色固定在最深的一级 —— 它在任何深度都是同一台仪器的读数窗。",
+      "html": "<div class=\"ds-depth\"><b>60</b><i>m</i></div>",
+      "css": ".ds-depth { position:relative; display:inline-flex; align-items:baseline; gap:2px; padding:3px 8px 3px 7px; background:var(--d90-turn, oklch(0.126 0.013 272)); box-shadow:inset 0 0 0 1px oklch(0.803 0.134 204 / .40); border-radius:3px; } .ds-depth::before { content:\"\"; position:absolute; left:0; top:50%; width:5px; height:5px; margin:-2.5px 0 0 -2.5px; border-radius:50%; background:var(--thermo, oklch(0.700 0.175 34)); } .ds-depth b { font:700 13px/1 'JetBrains Mono',ui-monospace,Menlo,monospace; color:var(--thermo, oklch(0.700 0.175 34)); font-variant-numeric:tabular-nums; } .ds-depth i { font:10px/1 'JetBrains Mono',ui-monospace,Menlo,monospace; font-style:normal; color:var(--snow-faint, oklch(0.708 0.030 248)); }"
+    },
+    {
+      "name": "Chronicle Item 刻痕志标牌",
+      "kind": "custom",
+      "refersTo": "chronicle",
+      "description": "一层层钉上去的调查标牌：只追加、不覆盖，最新一块的左边变青。",
+      "html": "<ul class=\"ds-chron\"><li class=\"ds-chron-i\"><p class=\"ds-chron-m\">0x8f2c…41ab · 第 2 任 · 区块 4,912,006</p><p class=\"ds-chron-w\">我把这里的坐标留给下一个人。</p></li><li class=\"ds-chron-i ds-chron-now\"><p class=\"ds-chron-m\">0x1d90…c7e2 · 第 3 任 · 区块 5,120,884</p><p class=\"ds-chron-w\">灯还亮着。</p></li></ul>",
+      "css": ".ds-chron { list-style:none; margin:0; padding:0; display:grid; gap:1px; } .ds-chron-i { padding:12px 14px; background:oklch(0.09 0.014 266 / .55); border-left:1px solid oklch(0.971 0.007 248 / .28); } .ds-chron-now { border-left-color:var(--thermo, oklch(0.700 0.175 34)); } .ds-chron-m { margin:0 0 5px; font:10px/1.5 'JetBrains Mono',ui-monospace,Menlo,monospace; letter-spacing:.02em; color:var(--snow-faint, oklch(0.708 0.030 248)); } .ds-chron-w { margin:0; font:13px/1.7 ui-sans-serif,-apple-system,'PingFang SC',sans-serif; color:var(--snow, oklch(0.971 0.007 248)); }"
+    }
+  ],
+  "narrative": {
+    "northStar": "抬头 —— The Last Light",
+    "overview": "世界是**把望远镜从地平线摇到天顶**。垂光台是最后一座还在运转的观星台，它记录每颗恒星熄灭前最后的光 —— 所以这套系统不是\"暗色主题\"，是一条**按仰角排好的序列**：页面往下滚就是镜筒往上抬，每一段正文都待在一个真实的高度上，那个高度决定它头顶的天是什么颜色、色觉还在不在。\n\n它的性格是仪器，不是海报。所有数字是等宽的读数，所有分隔是密度差而不是硬线，光只有两个来源：外面从左上擦过来的天光，和台里那盏红色的安全灯 —— 天文台夜里只点红光，因为红光不破坏暗适应。密度偏紧、留白靠刻度而不是靠空，表达集中在材质和读数上；到了作业页天色就不再变化 —— 变化属于抬头，不属于作业。\n\n确认拒绝的反面参照：这个品类的默认答案 —— 铺满发光星点的宇宙底 + 单一金色强调 + 居中的大倒计时。这一版里星星是**抬到高处才出现的东西**（低空的大气把它们吃掉了），而且永远是平涂的小圆点，没有辉光、没有光晕。方向合约 seed key 734ac0f0：骨架沿用，材质世界整体替换。",
+    "keyCharacteristics": [
+      "六段仰角地色，从地平线的钠灯霾一路冷到天顶；地色、仰角尺读数、天上的霾与星由同一个仰角值驱动",
+      "前景四级全部在最亮的地上过 4.5:1，最暗一级的亮度底线锁死在 L=0.708（实测 5.30:1）",
+      "整套只有一种饱和色（安全灯红），只用于\"当前仰角\"和\"能按下去的东西\"",
+      "暗适应之后色觉消失，只有安全灯（hover / focus）能把红带回来",
+      "光永远从左上来：开缝、内阴影、龛口、藏品图的明暗界线全部同向",
+      "88 个刻位分在四道弯着的肋环上（12/20/26/30）—— 弧线来自\"站在圆顶里往上看\"，不是装饰",
+      "中文标题是自托管黑体重字，等宽字只给真实测量值"
+    ],
+    "rules": [
+      {
+        "name": "The One Red Rule",
+        "body": "整套系统只有一种饱和色（安全灯红 oklch(0.700 0.175 34)）。它标记当前仰角和可操作项，不做标题色、不做装饰、不做分类。审核测试：把页面上所有红色块盖住，若还剩下第二种饱和色，这条就破了。",
+        "section": "colors"
+      },
+      {
+        "name": "The Altitude-Ground Rule",
+        "body": "背景永远来自那六个仰角值之一，通过 --ground 由段落用 data-alt 自己声明；不允许出现第七种底色。段与段之间用渐变化开 —— 天上没有硬边，全站唯一那条真硬边是 30° 那条测光界线，而它之所以是硬的，正因为它是人画的规矩，不是天上本来就有的东西。",
+        "section": "colors"
+      },
+      {
+        "name": "The Dark-Adaptation Rule",
+        "body": "--signal 是注册过类型的自定义属性（@property, syntax: \"<color>\"），不是常量。抬得越高地面的光越够不着，眼睛交给没有色觉的杆状细胞：45° 及以上一律是死灰。红色要回来必须有人把安全灯拧亮 —— 在 45/60/90 三段里，a、button 或 .lamp-target 被 hover / focus-visible 时用 240ms 过渡回真红。prefers-reduced-motion 下整条规则不生效。",
+        "section": "colors"
+      },
+      {
+        "name": "The Contrast Floor Rule",
+        "body": "前景四级每一级都必须在最亮的那层地（h00-horizon）上过 4.5:1，包括最暗的一级 —— 刻度上的数字也是字。底线是 L=0.708。层级差靠尺寸、字重、字距拉开，不靠把字压暗。",
+        "section": "colors"
+      },
+      {
+        "name": "The Real-Measurement Rule",
+        "body": "等宽字只给真实的测量值：深度、编号、地址、计数、余量、区块号、时间。不拿它装技术感。",
+        "section": "typography"
+      },
+      {
+        "name": "The Instrument-Chinese Rule",
+        "body": "展示字一律黑体重字（900）。仪器面板和水下写字板上不会出现宋体。新增文案必须重跑 npm run font 重新子集化，否则漏掉的字会静默掉回系统字体。",
+        "section": "typography"
+      },
+      {
+        "name": "The No-Ghost-Card Rule",
+        "body": "一块面板只用一种层次语言：要么一道 1px 密度线，要么一层底色，不要\"1px 边线 + 一层宽阴影\"。",
+        "section": "elevation"
+      },
+      {
+        "name": "The Light-From-Upper-Left Rule",
+        "body": "任何新的凹陷、壁面、光锥、水幕的光源都必须在左上：圆顶的开缝在左上，龛口上沿被照亮、下沿背光，藏品 SVG 的灯锥圆心固定在 (110, 90)。出现一处右上或正下方来的光，整页的材质就散了。",
+        "section": "elevation"
+      }
+    ],
+    "dos": [
+      "Do 让每一段新内容声明它的仰角（data-alt），并从那六个 --ground 里取底色。",
+      "Do 把新的强调需求交给尺寸、字重、字距或位置解决；安全灯红的稀有本身就是它的作用。",
+      "Do 用 --signal 表达\"这件事发生了/必须注意\"，并接受它在高处是灰的 —— 想让它红，就给那个元素 .lamp-target 让安全灯能照到。",
+      "Do 保持前景色在 star / star-mid / star-low / star-faint 四级之内，最暗不低于 L=0.708。",
+      "Do 新增中文文案后重跑 npm run font（子集化是构建步骤，不是一次性手工活）。",
+      "Do 让所有凹陷、壁面、光锥的光源保持在左上。",
+      "Do 用 gap: 1px + 底色差做列表分隔，用 1px --rule 做区块分隔。",
+      "Do 让藏品 SVG 只用系统字体栈，它们必须能在 OpenSea、钱包等任何地方独立渲染。",
+      "Do 在 prefers-reduced-motion 下关掉全部过渡；天只画一帧（星和霾还在，只是不动）。"
+    ],
+    "donts": [
+      "Don't 把星点当壁纸铺满：星是**抬到高处才出现**的，而且只能是平涂的小圆点 —— 有辉光、有光晕、有径向渐变的星点是被替换掉的那个默认答案。",
+      "Don't 在标题上方加 eyebrow / kicker。该信息若是真数据，它属于仰角尺或读数条。",
+      "Don't 引入第二种饱和色，也不要拿天区三色或安全灯红做标题色、装饰色。",
+      "Don't 用降低亮度来制造层级 —— 前景四级已经到底了。",
+      "Don't 给面板同时加 1px 边和宽投影（幽灵卡片）；也不要用外投影表达静态层次。",
+      "Don't 用噪点或任何\"材质滤镜\"伪造壁面；圆顶是人造结构，它由开缝、子午肋、肋环这三样东西画出来。",
+      "Don't 用 ✦ ● 这类字符充当图标 —— 图标一律手绘线性 SVG，统一 1.6–1.8 描边。",
+      "Don't 在藏品 SVG 里引用本站字体文件，或改动那座穹顶的分环（12/20/26/30）—— 改了它，同一个刻位在三个地方就落在三个位置上。",
+      "Don't 在窄屏上删掉仰角尺，也不要把首页的编排语言搬进作业页：你在暗处操作仪器的时候，不需要仪器表演。"
+    ]
+  }
+}
