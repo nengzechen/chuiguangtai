@@ -574,7 +574,7 @@ const REMNANTS = [
   },
 ];
 
-function buildEmber(id, base) {
+function buildEmber(id, base, site) {
   const rand = rng(id * 7919);
   const r = weighted(rand, REMNANTS);
   const heat = Math.floor(rand() * 100);
@@ -591,7 +591,7 @@ function buildEmber(id, base) {
         `${r.lore}\n\n` +
         `全站 2048 枚。它不值钱，只证明一件事：那颗恒星熄灭的时候，你在场。`,
       image: `${base}images/ember/${id}.svg`,
-      external_url: "https://example.com",
+      external_url: `${site}/token.html?id=${id}`,
       attributes: [
         { trait_type: "层级", value: "星屑 Ember" },
         { trait_type: "恒星遗迹", value: r.name },
@@ -663,7 +663,7 @@ function seatDepth(ordinal) {
   }
   return 118;
 }
-function buildConstellation(ordinal, base) {
+function buildConstellation(ordinal, base, site) {
   const [zh, latin] = CONSTELLATIONS[ordinal - 1];
   const rand = rng(ordinal * 104729 + 13);
 
@@ -680,7 +680,7 @@ function buildConstellation(ordinal, base) {
         `穹顶第 ${ordinal} 号刻位，${zh}（${latin}）。\n\n` +
         `全站仅 88 个 —— 人类命名过的星座就这么多。每个钱包只能刻一个。`,
       image: `${base}images/constellation/${ordinal}.svg`,
-      external_url: "https://example.com",
+      external_url: `${site}/token.html?id=${CONSTELLATION_OFFSET + ordinal}`,
       attributes: [
         { trait_type: "层级", value: "星座 Constellation" },
         { trait_type: "星座", value: zh },
@@ -697,13 +697,19 @@ function buildConstellation(ordinal, base) {
 
 function main() {
   const base = process.env.BASE || "http://127.0.0.1:8080/metadata/";
+  /*
+   * external_url 是交易平台上那个"跳回项目"的链接。
+   * 以前这里写死着 https://example.com —— 2136 件藏品每一件都挂着这个占位符，
+   * 在 OpenSea 上就是一个指向别人家的链接。现在指回这件藏品自己的页面。
+   */
+  const site = (process.env.SITE || "http://127.0.0.1:8080").replace(/\/$/, "");
 
   fs.mkdirSync(path.join(IMG, "ember"), { recursive: true });
   fs.mkdirSync(path.join(IMG, "constellation"), { recursive: true });
 
   const tally = {};
   for (let id = 1; id <= EMBER_SUPPLY; id++) {
-    const { svg, metadata } = buildEmber(id, base);
+    const { svg, metadata } = buildEmber(id, base, site);
     fs.writeFileSync(path.join(IMG, "ember", `${id}.svg`), svg);
     // tokenURI = baseURI + tokenId，所以文件名不带扩展名
     fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
@@ -712,7 +718,7 @@ function main() {
   }
 
   for (let ordinal = 1; ordinal <= CONSTELLATION_SUPPLY; ordinal++) {
-    const { svg, metadata, id } = buildConstellation(ordinal, base);
+    const { svg, metadata, id } = buildConstellation(ordinal, base, site);
     fs.writeFileSync(path.join(IMG, "constellation", `${ordinal}.svg`), svg);
     fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
   }
@@ -748,7 +754,7 @@ function main() {
           "所以最多只会有 88 个人在穹顶上留下名字。",
         image: base + "images/constellation/31.svg",
         banner_image: base + "images/ember/37.svg",
-        external_link: "https://example.com",
+        external_link: site,
       },
       null,
       2

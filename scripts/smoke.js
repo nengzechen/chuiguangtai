@@ -191,6 +191,30 @@ check("前端拼元数据地址的方式和合约一致", () => {
   }
   return `两边都是 baseURI + id + "${suffix[1]}"`;
 });
+check("元数据里没有占位地址，链接都指回本站", () => {
+  // external_url 曾经是 https://example.com —— 2136 件藏品每件都挂着它，
+  // 在交易平台上就是一个指向别人家的链接。
+  const ids = [1, 2048, CON_OFFSET + 1, CON_OFFSET + CON_SUPPLY];
+  const seen = new Set();
+  for (const id of ids) {
+    const m = JSON.parse(fs.readFileSync(path.join(META, `${id}.json`), "utf8"));
+    for (const [k, v] of [["image", m.image], ["external_url", m.external_url]]) {
+      must(v, `#${id} 缺 ${k}`);
+      must(!/example\.(com|org)|changeme|你的域名/i.test(v), `#${id} 的 ${k} 还是占位地址：${v}`);
+      must(/^https?:\/\//.test(v), `#${id} 的 ${k} 不是绝对地址：${v}`);
+      seen.add(new URL(v).origin);
+    }
+  }
+  // 合集页的信息也一起查：external_link 同样是给交易平台看的
+  const c = JSON.parse(fs.readFileSync(path.join(META, "contract.json"), "utf8"));
+  for (const [k, v] of [["external_link", c.external_link], ["image", c.image]]) {
+    must(v, `contract.json 缺 ${k}`);
+    must(!/example\.(com|org)/i.test(v), `contract.json 的 ${k} 还是占位地址：${v}`);
+    seen.add(new URL(v).origin);
+  }
+  must(seen.size === 1, `元数据里的地址跨了 ${seen.size} 个域名：${[...seen].join(" / ")}`);
+  return `${ids.length} 件藏品 + 合集页，都指向 ${[...seen][0]}`;
+});
 check("字号走的是刻度，不是随手写的 px", () => {
   const css = allCss();
   const tokens = (css.match(/var\(--t-[a-z0-9]+\)/g) || []).length;
