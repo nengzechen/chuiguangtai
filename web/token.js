@@ -5,10 +5,10 @@
  * 都该有自己的地址能发出去，而不是只活在一个长页面的抽屉里。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog, ON_LOCALHOST, notOpenYet }
-  from "./shared.js";
-import { buildCardSvg, svgToPng, download } from "./sharecard.js";
-import { toast } from "./toast.js";
+import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl }
+  from "./shared.js?v=7bde18d5";
+import { buildCardSvg, svgToPng, download } from "./sharecard.js?v=c094fe83";
+import { toast } from "./toast.js?v=0d4cc83d";
 
 const CON_OFFSET = 10000;
 const CON_SUPPLY = 88;
@@ -126,7 +126,7 @@ function renderNotFound(id) {
 // ───────────────────────────────────────────────────── 元数据
 
 async function renderMeta() {
-  const m = await (await fetch(state.dep.baseURI + state.id)).json();
+  const m = await (await fetch(metaUrl(state.dep, state.id))).json();
   state.meta = m;
 
   document.title = `${m.name} · 垂光台`;

@@ -153,7 +153,9 @@ check("每个页面用到的共享函数都真的 import 了", () => {
   const missing = [];
   for (const f of ["app.js", "token.js", "keeper.js", "landing.js"]) {
     const src = fs.readFileSync(path.join(WEB, f), "utf8");
-    const imp = src.match(/import\s*\{([^}]*)\}\s*from\s*"\.\/shared\.js"/);
+    // 打过指纹之后是 "./shared.js?v=abc12345"
+    // import 可能跨行写，\s* 要能吃掉换行
+    const imp = src.match(/import\s*\{([^}]*)\}\s*from\s*"\.\/shared\.js(?:\?v=[0-9a-z]+)?"/s);
     const names = imp ? imp[1].split(",").map((x) => x.trim()).filter(Boolean) : [];
     // 去掉 import 那一行再找用法，免得自己匹配自己
     const body = src.replace(/import[^;]*;/g, "");
@@ -168,6 +170,26 @@ check("每个页面用到的共享函数都真的 import 了", () => {
   }
   must(missing.length === 0, missing.join("；"));
   return `${exported.length} 个共享导出，4 个页面都对得上`;
+});
+check("前端拼元数据地址的方式和合约一致", () => {
+  // 合约是 baseURI + tokenId + ".json"。我给合约加后缀时漏了前端三处，
+  // 页面当场 404 —— 这条盯住两边不许再走岔。
+  const sol = fs.readFileSync(
+    path.join(__dirname, "..", "contracts", "Observatory.sol"), "utf8");
+  const suffix = sol.match(/_toString\(tokenId\),\s*"([^"]*)"/);
+  must(suffix, "合约里找不到 tokenURI 的后缀");
+
+  const shared = fs.readFileSync(path.join(WEB, "shared.js"), "utf8");
+  const js = shared.match(/metaUrl\s*=\s*\(dep,\s*id\)\s*=>\s*`\$\{dep\.baseURI\}\$\{id\}([^`]*)`/);
+  must(js, "shared.js 里找不到 metaUrl");
+  must(js[1] === suffix[1], `合约拼的是 "${suffix[1]}"，前端拼的是 "${js[1]}"`);
+
+  // 而且没有别的地方还在自己拼
+  for (const f of ["app.js", "token.js", "keeper.js"]) {
+    const src = fs.readFileSync(path.join(WEB, f), "utf8");
+    must(!/baseURI\s*\+/.test(src), `${f} 还在自己拼 baseURI，应该走 metaUrl`);
+  }
+  return `两边都是 baseURI + id + "${suffix[1]}"`;
 });
 check("字号走的是刻度，不是随手写的 px", () => {
   const css = allCss();

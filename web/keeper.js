@@ -6,10 +6,10 @@
  * 称号、星域、亲手写的字、名下的藏品。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short, notOpenYet } from "./shared.js";
-import { buildCardSvg, svgToPng, download } from "./sharecard.js";
-import { seatPositions, wallChrome } from "./dome.js";
-import { toast } from "./toast.js";
+import { CHAINS, short, notOpenYet, metaUrl } from "./shared.js?v=7bde18d5";
+import { buildCardSvg, svgToPng, download } from "./sharecard.js?v=c094fe83";
+import { seatPositions, wallChrome } from "./dome.js?v=85c127cd";
+import { toast } from "./toast.js?v=0d4cc83d";
 
 const CON_OFFSET = 10000;
 const CON_SUPPLY = 88;
@@ -229,7 +229,7 @@ async function renderVault() {
     ids.map(async (id) => {
       try {
         if ((await state.c.ownerOf(id)) !== state.addr) return null;
-        const m = await (await fetch(state.dep.baseURI + id)).json();
+        const m = await (await fetch(metaUrl(state.dep, id))).json();
         const isCon = Number(id) > CON_OFFSET;
         return `<a class="relic ${isCon ? "con" : ""}" href="token.html?id=${id}">
           <img src="${m.image}" alt="${esc(m.name)}" loading="lazy"/>
