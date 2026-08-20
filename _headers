@@ -4,9 +4,10 @@
   X-Content-Type-Options: nosniff
   Referrer-Policy: strict-origin-when-cross-origin
   X-Frame-Options: DENY
-  # 这一页只连自己的域名和 Robinhood 链的 RPC。
+  # 这一页只连自己的域名、Robinhood 链的 RPC，以及 IPFS 网关
+  # （链上的 baseURI 是 ipfs://，同域镜像不可用时要回退到网关）。
   # 钱包是通过 window.ethereum 注入的，不走网络请求，所以不用为它开口子。
-  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://rpc.mainnet.chain.robinhood.com https://rpc.testnet.chain.robinhood.com; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
+  Content-Security-Policy: default-src 'self'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; font-src 'self'; connect-src 'self' https://rpc.mainnet.chain.robinhood.com https://rpc.testnet.chain.robinhood.com https://ipfs.filebase.io https://ipfs.io https://dweb.link; frame-ancestors 'none'; base-uri 'self'; form-action 'none'
 
 # 带版本号的静态资源可以长期缓存
 /fonts/*

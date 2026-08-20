@@ -3,7 +3,7 @@ import { seatPositions, wallChrome, asterismGlyph } from "./dome.js?v=85c127cd";
 import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
-import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl } from "./shared.js?v=7bde18d5";
+import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl } from "./shared.js?v=402f1252";
 
 // ═══════════════════════════════════════════════════════ 常量
 
