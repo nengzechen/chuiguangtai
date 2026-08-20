@@ -6,7 +6,7 @@
  * 首页的唯一任务是让人看懂"位置有限，而且正在减少"。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS } from "./shared.js";
+import { CHAINS, notOpenYet } from "./shared.js";
 import { TIMELINE } from "./content.js";
 import { asterismSvg, RINGS, regionOf } from "./dome.js";
 
@@ -182,6 +182,15 @@ function buildFigures() {
 async function loadChain() {
   try {
     const dep = await (await fetch("deployment.json")).json();
+
+    /*
+     * 站已经发出去、但合约还指着本地链的那段时间：直接不连。
+     * 不加这一下，首页会朝 127.0.0.1:8545 发几十个请求 ——
+     * 那个地址在访客的机器上是他自己的电脑，不是我们的链。
+     * 请求全部失败，控制台刷满红字，而墙上本来就该是空的。
+     */
+    if (notOpenYet(dep)) return;
+
     const info = CHAINS[dep.chainId];
     if (!info) throw new Error("unknown chain");
 
