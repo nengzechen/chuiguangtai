@@ -223,25 +223,30 @@ DigitalPlat FreeDomain（`dpdns.org` / `us.kg`）。
 
 ### 搬到 IPFS
 
-这套藏品是 **4274 个文件**（2136 张图 + 2138 份 JSON）。按文件传的话，
-免费档一个都放不下：Pinata 上限 500，Filebase 1000。
+这套藏品是 **4274 个文件**（2136 张图 + 2138 份 JSON）。按文件传，
+免费档没有一家放得下：Pinata 上限 500，而它的 CAR 上传和 pinByHash
+都是付费功能（三条路都实测过，分别是 400 / 文档明写 / 403 PAID_FEATURE_ONLY）。
 
-但 IPFS 的目录本身就是一个 CID。只要内容在网络上找得到，就能让 pin 服务
-**按 CID 收养整棵树**——那只占 1 个 pin。所以本机跑个节点把内容放出去，
-让 Pinata 抓走，抓完本机节点就能关：
+走得通的是 **Filebase + CAR**：它的 S3 接口收 CAR，带上 `import=car`
+元数据标记上传，整棵树一次导进去，**根 CID 原样保留** ——
+2136 张图只占一个对象。免费档 5GB。
 
 ```bash
-ipfs daemon &                                  # 本机节点，内容从这儿出去
-npm run ipfs:pin                               # 加进节点 → 让 Pinata 按 CID 收养 → 等它抓完
-BASE=ipfs://<CID>/ npm run setbase -- --network robinhood
+SITE=https://nengzechen.github.io/chuiguangtai npm run ipfs   # 本机打 CAR，算出确定 CID
+npm run filebase                                              # 传，并核对 CID 一致
+BASE=ipfs://<CID>/ npm run setbase -- --network robinhood      # 换链上地址
 ```
 
-拿 JWT：pinata.cloud 注册 → API Keys → New Key → 勾上 **`pinByHash`**
-（`pinFileToIPFS` 也留着）→ 写进 `.env` 的 `PINATA_JWT`。
-只勾 `pinFileToIPFS` 是不够的，`pinByHash` 才是"按 CID 收养"那个权限。
+`.env` 要三样：`FILEBASE_KEY` / `FILEBASE_SECRET` / `FILEBASE_BUCKET`。
+建桶时 **Network 必须选 IPFS**，否则 `import=car` 不生效、CID 对不上，
+上传脚本会当场停下不让你往下走。
 
 **必须分两步、顺序不能反**：元数据里写着图片地址，所以图片得先定 CID，
 元数据才写得出来；元数据写完才能算它自己的 CID。一步到位是死结。
+
+打包时**必须带 SITE**。不带的话 `external_url` 会掉回 `http://127.0.0.1:8080/…`，
+2136 件藏品全挂着一个本机地址——这个坑踩过一次，是把 CAR 解开逐字看才发现的，
+现在 `ipfs-pack.js` 不带 SITE 直接拒绝运行，生成完还会自检图片和外链两样。
 
 换 `baseURI` 之前，`set-base-uri.js` 会从网关取 `1.json` / `10001.json` /
 `contract.json`，还要确认里面的图打得开，三样都过才动链上。
@@ -256,9 +261,6 @@ BASE=https://nengzechen.github.io/chuiguangtai/metadata/ npm run metadata
 ```
 
 两份内容各自自洽：链上指 IPFS，页面读同域，互不影响。
-
-（`npm run ipfs` 是另一条路：本机打 CAR 包、算确定 CID，
-适合 Storacha 那类收 CAR 的服务。Pinata 的 CAR 上传是付费档功能。）
 
 ### 两条链
 

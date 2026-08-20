@@ -25,6 +25,28 @@ const sh = (args) =>
     cwd: ROOT, encoding: "utf8", maxBuffer: 1 << 28,
   }).trim();
 
+
+/** 重新生成元数据时必须带上 SITE，否则 external_url 会掉回 localhost。 */
+function regenerate(imageBase) {
+  const site = process.env.SITE;
+  if (!site) {
+    throw new Error(
+      "没有 SITE。不带它重新生成，2136 件藏品的 external_url 会全变成 " +
+      "http://127.0.0.1:8080/… —— 传上链就改不回来了。\n" +
+      "  SITE=https://nengzechen.github.io/chuiguangtai node scripts/<本脚本>"
+    );
+  }
+  execFileSync("node", [path.join("scripts", "gen-metadata.js")], {
+    cwd: ROOT, stdio: "ignore",
+    env: { ...process.env, SITE: site, IMAGE_BASE: imageBase },
+  });
+  // 自检：图片和外链两样都得对
+  const m = JSON.parse(fs.readFileSync(path.join(META, "1.json"), "utf8"));
+  if (!m.image.startsWith(imageBase)) throw new Error(`图片地址不对：${m.image}`);
+  if (!m.external_url.startsWith(site)) throw new Error(`外链不对：${m.external_url}`);
+  return m;
+}
+
 fs.mkdirSync(DIST, { recursive: true });
 
 // ── 第一步：图片
@@ -36,16 +58,9 @@ console.log(`   ${(fs.statSync(imgCar).size / 1e6).toFixed(1)} MB → dist/image
 
 // ── 第二步：拿着图片的 CID 重新生成元数据
 console.log("\n② 用这个 CID 重新生成元数据 …");
-execFileSync("node", [path.join("scripts", "gen-metadata.js")], {
-  cwd: ROOT,
-  stdio: "ignore",
-  env: { ...process.env, IMAGE_BASE: `ipfs://${cidImg}/` },
-});
-const sample = JSON.parse(fs.readFileSync(path.join(META, "1.json"), "utf8"));
-console.log(`   #1 的 image = ${sample.image}`);
-if (!sample.image.startsWith(`ipfs://${cidImg}/`)) {
-  throw new Error("元数据里的图片地址没换成 IPFS，中止");
-}
+const sample = regenerate(`ipfs://${cidImg}/`);
+console.log(`   #1 image        = ${sample.image}`);
+console.log(`   #1 external_url = ${sample.external_url}`);
 
 // ── 第三步：把 JSON 单独摊到一个目录里打包（不能带上 images/，否则 CID 又变了）
 console.log("\n③ 打包元数据 …");
