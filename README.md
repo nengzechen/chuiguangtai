@@ -213,9 +213,36 @@ Netlify、Vercel 都是每月 100GB 封顶），仓库里的 `web/_headers`（�
 DigitalPlat FreeDomain（`dpdns.org` / `us.kg`）。
 
 > 免费域名有个真实风险：域名一旦失效，指向它的 `baseURI` 会一起死，
-> 所有 NFT 在 OpenSea 和钱包里变空白。所以**正式发行建议把 `BASE` 换成 IPFS**
-> （`web/metadata/` 只有 31MB，主流 pin 服务免费档 1GB 足够），
-> 站点本身放免费域名 —— 站挂了元数据还在，这两件事不该绑在一起。
+> 所有 NFT 在 OpenSea 和钱包里变空白。站点本身放免费域名没问题，
+> **但藏品的元数据应该走 IPFS** —— 站挂了元数据还在，这两件事不该绑在一起。
+
+### 搬到 IPFS
+
+```bash
+npm run ipfs        # 本机算出确定的 CID，产出两个 CAR 包
+```
+
+分两步是必须的：CID 是内容的哈希，元数据里写着图片地址，
+所以图片必须先定 CID，元数据才写得出来；元数据写完才能算它自己的 CID。
+一步到位是"CID 依赖内容、内容依赖 CID"的死结。
+
+产出 `dist/images.car`（20MB）和 `dist/metadata.car`（2.4MB）。
+**上传 CAR 而不是文件夹** —— CAR 里带着的就是这份内容算出来的哈希，
+传到哪家 pin 服务 CID 都一样。Pinata、Storacha 免费档都收。
+
+pin 好之后换合约：
+
+```bash
+BASE=ipfs://<CID>/ npm run setbase -- --network robinhood
+```
+
+`set-base-uri.js` 换之前会先替你验一遍：`1.json` / `10001.json` /
+`contract.json` 三个都能从网关取到、并且里面的图也打得开，才动链上。
+把 `baseURI` 指到一个打不开的地方等于让所有藏品当场变空白，
+而这件事没有任何提示，只有藏家会发现。
+
+注意站上那份 `web/metadata/` 和 CAR 里那份是两份内容：
+站上的图片写 https，CAR 里的写 `ipfs://` —— 各自内部自洽，互不影响。
 
 ### 两条链
 

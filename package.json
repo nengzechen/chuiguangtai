@@ -23,7 +23,9 @@
     "whoami": "hardhat run scripts/whoami.js",
     "preflight": "node scripts/preflight.js",
     "release": "npm run metadata && npm run site && npm run font && npm run stamp && npm run smoke && npm run preflight",
-    "stamp": "node scripts/stamp.js"
+    "stamp": "node scripts/stamp.js",
+    "ipfs": "node scripts/ipfs-pack.js",
+    "setbase": "hardhat run scripts/set-base-uri.js"
   },
   "keywords": [],
   "author": "",
@@ -38,6 +40,7 @@
     "dotenv": "^17.4.2",
     "hardhat": "^2.29.0",
     "htmlparser2": "^12.0.0",
+    "ipfs-car": "^3.1.0",
     "subset-font": "^2.5.0"
   },
   "dependencies": {

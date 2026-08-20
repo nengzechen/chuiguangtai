@@ -574,7 +574,7 @@ const REMNANTS = [
   },
 ];
 
-function buildEmber(id, base, site) {
+function buildEmber(id, imageBase, site) {
   const rand = rng(id * 7919);
   const r = weighted(rand, REMNANTS);
   const heat = Math.floor(rand() * 100);
@@ -590,7 +590,7 @@ function buildEmber(id, base, site) {
       description:
         `${r.lore}\n\n` +
         `全站 2048 枚。它不值钱，只证明一件事：那颗恒星熄灭的时候，你在场。`,
-      image: `${base}images/ember/${id}.svg`,
+      image: `${imageBase}ember/${id}.svg`,
       external_url: `${site}/token.html?id=${id}`,
       attributes: [
         { trait_type: "层级", value: "星屑 Ember" },
@@ -663,7 +663,7 @@ function seatDepth(ordinal) {
   }
   return 118;
 }
-function buildConstellation(ordinal, base, site) {
+function buildConstellation(ordinal, imageBase, site) {
   const [zh, latin] = CONSTELLATIONS[ordinal - 1];
   const rand = rng(ordinal * 104729 + 13);
 
@@ -679,7 +679,7 @@ function buildConstellation(ordinal, base, site) {
       description:
         `穹顶第 ${ordinal} 号刻位，${zh}（${latin}）。\n\n` +
         `全站仅 88 个 —— 人类命名过的星座就这么多。每个钱包只能刻一个。`,
-      image: `${base}images/constellation/${ordinal}.svg`,
+      image: `${imageBase}constellation/${ordinal}.svg`,
       external_url: `${site}/token.html?id=${CONSTELLATION_OFFSET + ordinal}`,
       attributes: [
         { trait_type: "层级", value: "星座 Constellation" },
@@ -703,13 +703,21 @@ function main() {
    * 在 OpenSea 上就是一个指向别人家的链接。现在指回这件藏品自己的页面。
    */
   const site = (process.env.SITE || "http://127.0.0.1:8080").replace(/\/$/, "");
+  /*
+   * 图片的地址可以和元数据的地址分开。
+   * 上 IPFS 时这是必须的：图片先 pin 拿到 CID_A，元数据里写 ipfs://CID_A/…，
+   * 然后元数据自己再 pin 拿到 CID_B —— 内容决定 CID，所以只能分两步来，
+   * 一步到位会变成"CID 依赖内容、内容依赖 CID"的死circle。
+   * 不设就跟着 base 走（同域托管的情形）。
+   */
+  const imageBase = (process.env.IMAGE_BASE || `${base}images/`).replace(/\/?$/, "/");
 
   fs.mkdirSync(path.join(IMG, "ember"), { recursive: true });
   fs.mkdirSync(path.join(IMG, "constellation"), { recursive: true });
 
   const tally = {};
   for (let id = 1; id <= EMBER_SUPPLY; id++) {
-    const { svg, metadata } = buildEmber(id, base, site);
+    const { svg, metadata } = buildEmber(id, imageBase, site);
     fs.writeFileSync(path.join(IMG, "ember", `${id}.svg`), svg);
     // tokenURI = baseURI + tokenId，所以文件名不带扩展名
     fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
@@ -718,7 +726,7 @@ function main() {
   }
 
   for (let ordinal = 1; ordinal <= CONSTELLATION_SUPPLY; ordinal++) {
-    const { svg, metadata, id } = buildConstellation(ordinal, base, site);
+    const { svg, metadata, id } = buildConstellation(ordinal, imageBase, site);
     fs.writeFileSync(path.join(IMG, "constellation", `${ordinal}.svg`), svg);
     fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
   }
@@ -752,8 +760,8 @@ function main() {
           "星屑 2048 枚，免费拾取，是你到过这里的唯一证据。" +
           "星座 88 个，付费铭刻，每个钱包只能刻一个 —— " +
           "所以最多只会有 88 个人在穹顶上留下名字。",
-        image: base + "images/constellation/31.svg",
-        banner_image: base + "images/ember/37.svg",
+        image: imageBase + "constellation/31.svg",
+        banner_image: imageBase + "ember/37.svg",
         external_link: site,
       },
       null,
