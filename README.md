@@ -224,30 +224,37 @@ DigitalPlat FreeDomain（`dpdns.org` / `us.kg`）。
 ### 搬到 IPFS
 
 ```bash
-npm run ipfs        # 本机算出确定的 CID，产出两个 CAR 包
+PINATA_JWT=… npm run ipfs:upload          # 传 → 拿 CID → 验网关
+BASE=ipfs://<CID>/metadata/ npm run setbase -- --network robinhood
 ```
 
-分两步是必须的：CID 是内容的哈希，元数据里写着图片地址，
-所以图片必须先定 CID，元数据才写得出来；元数据写完才能算它自己的 CID。
-一步到位是"CID 依赖内容、内容依赖 CID"的死结。
+拿 JWT：pinata.cloud 注册（免费档 1GB，这套内容 23MB）→ API Keys → New Key
+→ **只勾 `pinFileToIPFS`** → 把 JWT 写进 `.env` 的 `PINATA_JWT`。
+权限收窄是有意义的：万一泄漏，别人只能往你账号里塞新文件，
+删不掉也管不了已有的 pin。
 
-产出 `dist/images.car`（20MB）和 `dist/metadata.car`（2.4MB）。
-**上传 CAR 而不是文件夹** —— CAR 里带着的就是这份内容算出来的哈希，
-传到哪家 pin 服务 CID 都一样。Pinata、Storacha 免费档都收。
+**必须分两步传，顺序不能反**：元数据里写着图片地址，所以图片得先传、
+先拿到 CID，元数据才写得出来；元数据写完才能传。脚本按
+「传图片 → 用真实 CID 重生成元数据 → 传元数据 → 逐个网关确认」跑完这一串。
 
-pin 好之后换合约：
+一切以**服务端返回的 CID 为准**，不用本机预算的那个 —— 文件夹上传的 CID
+由服务端切块方式决定，不保证等于 `ipfs-car` 算出来的。
+（`npm run ipfs` 仍然在，它本机打 CAR 包、算确定 CID，
+适合 Storacha 这类收 CAR 的服务；Pinata 的 CAR 上传是付费档功能。）
+
+换 `baseURI` 之前，`set-base-uri.js` 会从网关取 `1.json` / `10001.json` /
+`contract.json`，还要确认里面的图打得开，三样都过才动链上。
+把 `baseURI` 指到打不开的地方等于让所有藏品当场变空白，
+而且没有任何提示，只有藏家会发现。
+
+传完之后站上那份 `web/metadata/` 会写成 `ipfs://`。要让页面继续走 https：
 
 ```bash
-BASE=ipfs://<CID>/ npm run setbase -- --network robinhood
+SITE=https://nengzechen.github.io/chuiguangtai \
+BASE=https://nengzechen.github.io/chuiguangtai/metadata/ npm run metadata
 ```
 
-`set-base-uri.js` 换之前会先替你验一遍：`1.json` / `10001.json` /
-`contract.json` 三个都能从网关取到、并且里面的图也打得开，才动链上。
-把 `baseURI` 指到一个打不开的地方等于让所有藏品当场变空白，
-而这件事没有任何提示，只有藏家会发现。
-
-注意站上那份 `web/metadata/` 和 CAR 里那份是两份内容：
-站上的图片写 https，CAR 里的写 `ipfs://` —— 各自内部自洽，互不影响。
+两份内容各自自洽，互不影响：链上指 IPFS，页面读同域。
 
 ### 两条链
 
