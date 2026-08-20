@@ -239,16 +239,27 @@ Netlify、Vercel）都是每月 100GB 封顶。附带 CDN、HTTPS、DDoS 防护�
 
 ### 现在的状态
 
+**站已经上线了**：<https://nengzechen.github.io/chuiguangtai/>
 仓库：<https://github.com/nengzechen/chuiguangtai>（公开）
-站点地址（Pages 打开后即生效）：<https://nengzechen.github.io/chuiguangtai/>
 
-所有绝对地址已经按这个域名盖好了。**还差两件事**：
+Pages 用的是 **legacy 分支源**（`gh-pages` 分支，根目录）。
+最初想走 Actions，但 workflow 自带的 GITHUB_TOKEN 建不了 Pages 站点
+（`Resource not accessible by integration`）；推一个 `gh-pages` 分支会自动把
+Pages 开起来，所以走了这条。发布命令：
 
-1. **打开 Pages** —— 仓库 Settings → Pages → Source 选 **GitHub Actions**。
-   （workflow 里的 `configure-pages` 只能读取配置，建不了站点：
-   GITHUB_TOKEN 没有创建权限，试过了，报 `Resource not accessible by integration`。）
-2. **给部署钱包一点 gas** —— `0xDEPLOYER_REDACTED` 现在两条链都是 0。
-   测试网部署约 0.00064 ETH，主网约 0.000057 ETH（实测 2,859,038 gas）。
+```bash
+git subtree push --prefix web origin gh-pages
+```
+
+（`.github/workflows/pages.yml` 留着 —— 哪天在 Settings 里把 Source 改成
+GitHub Actions，它就接管，那之后 push main 即自动发布。）
+
+**还差一件事：给部署钱包一点 gas。**
+`0xDEPLOYER_REDACTED` 现在两条链都是 0。
+实测部署耗 2,859,038 gas —— 测试网约 0.00064 ETH，主网约 0.000057 ETH。
+官方水龙头和几家第三方都要过验证码 + 发推，只能你自己领或者从金库转一点过去。
+
+合约上链之前，页面显示的是「尚未开台」：所有按钮禁用，设定、图鉴、纪年照常可读。
 
 ### 上线步骤
 
