@@ -1,9 +1,9 @@
 import { ethers } from "./vendor/ethers.js";
-import { seatPositions, wallChrome, asterismGlyph } from "./dome.js";
-import { toast } from "./toast.js";
+import { seatPositions, wallChrome, asterismGlyph } from "./dome.js?v=85c127cd";
+import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
-  from "./content.js";
-import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet } from "./shared.js";
+  from "./content.js?v=2c67cd39";
+import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl } from "./shared.js?v=7bde18d5";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -117,7 +117,7 @@ function txLink(hash) {
 async function meta(tokenId) {
   const key = String(tokenId);
   if (state.metaCache.has(key)) return state.metaCache.get(key);
-  const p = fetch(state.dep.baseURI + key)
+  const p = fetch(metaUrl(state.dep, key))
     .then((r) => r.json())
     .catch(() => null);
   state.metaCache.set(key, p);

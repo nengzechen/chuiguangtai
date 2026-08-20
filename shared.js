@@ -24,6 +24,15 @@ export const DEMO_RPC = "http://127.0.0.1:8545";
 export const notOpenYet = (dep) =>
   !ON_LOCALHOST && (!dep || dep.chainId === 31337);
 
+/**
+ * 一件藏品的元数据地址。**必须和合约里的 tokenURI 拼法一致。**
+ *
+ * 合约是 baseURI + tokenId + ".json"。以前两边都不带后缀，我给合约加了
+ * 后缀却漏了前端这三处，页面直接 404 —— 所以现在只留这一个拼法，
+ * 三个页面都从这儿拿，想再走岔也没地方岔。
+ */
+export const metaUrl = (dep, id) => `${dep.baseURI}${id}.json`;
+
 /** 影子钱包只在本机出现。线上任何情况下都不许走这条路。 */
 export const ON_LOCALHOST =
   typeof location !== "undefined" &&
