@@ -237,6 +237,19 @@ Netlify、Vercel）都是每月 100GB 封顶。附带 CDN、HTTPS、DDoS 防护�
 > （`web/metadata/` 只有 31MB，Pinata 免费档 1GB 足够），
 > 站点本身放在免费域名上 —— 站挂了元数据还在，这两件事不该绑在一起。
 
+### 现在的状态
+
+仓库：<https://github.com/nengzechen/chuiguangtai>（公开）
+站点地址（Pages 打开后即生效）：<https://nengzechen.github.io/chuiguangtai/>
+
+所有绝对地址已经按这个域名盖好了。**还差两件事**：
+
+1. **打开 Pages** —— 仓库 Settings → Pages → Source 选 **GitHub Actions**。
+   （workflow 里的 `configure-pages` 只能读取配置，建不了站点：
+   GITHUB_TOKEN 没有创建权限，试过了，报 `Resource not accessible by integration`。）
+2. **给部署钱包一点 gas** —— `0xDEPLOYER_REDACTED` 现在两条链都是 0。
+   测试网部署约 0.00064 ETH，主网约 0.000057 ETH（实测 2,859,038 gas）。
+
 ### 上线步骤
 
 ```bash
