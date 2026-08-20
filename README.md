@@ -5,8 +5,13 @@
 （ERC-721 + ERC-2981 + `contractURI`）。
 
 **站点** <https://nengzechen.github.io/chuiguangtai/>
-**合约（测试网）** [`0xdce4…4034`](https://explorer.testnet.chain.robinhood.com/address/0xdce46962b34803f4FB0F8338e94f8B1b607a4034#code) · 源码已验证
-**链** Robinhood Chain Testnet（chainId 46630）
+
+| | 地址 | 源码 |
+|---|---|---|
+| 主网 (4663) | [`0xdce4…4034`](https://robinhoodchain.blockscout.com/address/0xdce46962b34803f4FB0F8338e94f8B1b607a4034#code) | 已验证 |
+| 测试网 (46630) | [`0xdce4…4034`](https://explorer.testnet.chain.robinhood.com/address/0xdce46962b34803f4FB0F8338e94f8B1b607a4034#code) | 已验证 |
+
+两条链同地址：部署者相同、nonce 相同，算出来的合约地址自然一样。
 
 ---
 
