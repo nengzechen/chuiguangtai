@@ -21,8 +21,13 @@ async function main() {
   const [deployer] = await ethers.getSigners();
   const base = process.env.BASE || "http://127.0.0.1:8080/metadata/";
   const price = ethers.parseEther(process.env.INSCRIPTION_PRICE || "0.0088");
-  // 献纳的收款地址。写死进合约，部署之后谁也改不了 —— 包括我。
-  const treasury = process.env.TREASURY || "0xTREASURY_REDACTED";
+  // 献纳的收款地址。写死进合约，部署之后谁也改不了。
+  // 只从 .env 读，仓库里不留 —— 地址本身在链上是公开的，
+  // 但没必要在代码库里把它和这个 GitHub 账号绑在一起。
+  const treasury = process.env.TREASURY;
+  if (!treasury) {
+    throw new Error("没有 TREASURY。把收款地址写进 .env 再部署。");
+  }
   const royaltyBps = BigInt(process.env.ROYALTY_BPS || 500);
 
   if (!ethers.isAddress(treasury)) {
@@ -65,7 +70,6 @@ async function main() {
   const artifact = await hre.artifacts.readArtifact("Observatory");
   const out = {
     address,
-    treasury,
     chainId: Number((await ethers.provider.getNetwork()).chainId),
     network: network.name,
     explorer: EXPLORERS[network.name] || null,

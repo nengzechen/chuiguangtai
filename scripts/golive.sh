@@ -13,9 +13,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
+# 两行分开写：`export A=1 B=$A` 里的 $A 取的是**旧**值，
+# 一行连写会让 BASE 变成 "/metadata/"，元数据里的图片地址全成相对路径。
 SITE="https://nengzechen.github.io/chuiguangtai"
 export SITE
-export BASE="$SITE/metadata/"
+export BASE="${SITE}/metadata/"
 
 case "${1:-}" in
   testnet) NET=robinhoodTestnet ;;

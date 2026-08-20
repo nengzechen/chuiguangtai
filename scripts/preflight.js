@@ -6,6 +6,7 @@
  * 天天都在违反 preflight 的条件（指向 127.0.0.1、连的是本地链），
  * 那不是错，只是还没到上线那一步。
  */
+require("dotenv").config();
 const fs = require("fs");
 const path = require("path");
 
@@ -15,6 +16,7 @@ const PLACEHOLDERS = /example\.|你的域名|your-domain|changeme/i;
 const read = (f) => fs.readFileSync(path.join(WEB, f), "utf8");
 
 let bad = 0, warn = 0;
+const checks = [];   // 需要连链的检查，攒着最后一起跑
 const fail = (msg, how) => { bad++; console.log(`  ✗ ${msg}\n    → ${how}`); };
 const soft = (msg, how) => { warn++; console.log(`  ! ${msg}\n    → ${how}`); };
 const ok   = (msg) => console.log(`  ✓ ${msg}`);
@@ -39,13 +41,36 @@ if (dep) {
   }
 
   // ── 2. 献纳流向
-  const TREASURY = "0xTREASURY_REDACTED";
-  if (!dep.treasury) {
-    soft("deployment.json 里没记金库地址", "用新版 deploy.js 重新部署即可");
-  } else if (dep.treasury.toLowerCase() !== TREASURY.toLowerCase()) {
-    fail(`金库是 ${dep.treasury}，不是约定的 ${TREASURY}`, "TREASURY=… 重新部署");
+  // 同样只从 .env 读
+  const TREASURY = process.env.TREASURY || "";
+  // 金库不写进 deployment.json（那个文件要发到公网）。
+  // 唯一权威的来源是链上的合约本身，所以直接问它。
+  if (!TREASURY) {
+    soft("没设 TREASURY，跳过金库核对", ".env 里写上收款地址就能查");
   } else {
-    ok(`献纳流向 ${dep.treasury}`);
+    checks.push(async () => {
+      const RPC = {
+        4663: "https://rpc.mainnet.chain.robinhood.com",
+        46630: "https://rpc.testnet.chain.robinhood.com",
+      }[dep.chainId];
+      if (!RPC) return soft("这条链没有已知的 RPC，跳过金库核对", "");
+      // TREASURY() 的选择器
+      const sel = "0x2d2c5565"; // ethers.id("TREASURY()").slice(0,10)
+      const res = await fetch(RPC, {
+        method: "POST",
+        headers: { "content-type": "application/json" },
+        body: JSON.stringify({
+          jsonrpc: "2.0", id: 1, method: "eth_call",
+          params: [{ to: dep.address, data: sel }, "latest"],
+        }),
+      }).then((r) => r.json());
+      const onchain = "0x" + (res.result || "").slice(-40);
+      if (onchain.toLowerCase() === TREASURY.toLowerCase()) {
+        ok("链上合约的金库和 .env 对得上");
+      } else {
+        fail(`链上金库是 ${onchain}，和 .env 对不上`, "确认部署时用的是同一个 TREASURY");
+      }
+    });
   }
 
   // ── 3. baseURI 必须是公网可达的绝对地址
@@ -104,7 +129,12 @@ const metaDir = path.join(WEB, "metadata");
 const n = fs.existsSync(metaDir) ? fs.readdirSync(metaDir).filter((f) => /^\d+\.json$/.test(f)).length : 0;
 n >= 2136 ? ok(`元数据 ${n} 份`) : fail(`元数据只有 ${n} 份，应该 2136`, "npm run metadata");
 
-console.log("─".repeat(46));
-if (bad === 0 && warn === 0) console.log("可以上线。\n");
-else console.log(`${bad} 项必须解决${warn ? `，${warn} 项建议处理` : ""}。\n`);
-process.exitCode = bad ? 1 : 0;
+(async () => {
+  for (const c of checks) {
+    try { await c(); } catch (e) { fail("金库核对没连上链", e.message); }
+  }
+  console.log("─".repeat(46));
+  if (bad === 0 && warn === 0) console.log("可以上线。\n");
+  else console.log(`${bad} 项必须解决${warn ? `，${warn} 项建议处理` : ""}。\n`);
+  process.exitCode = bad ? 1 : 0;
+})();

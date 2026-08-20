@@ -7,6 +7,6 @@ async function main() {
   console.log(`网络     : ${hre.network.name} (chainId ${net.chainId})`);
   console.log(`部署者   : ${s.address}`);
   console.log(`余额     : ${hre.ethers.formatEther(bal)} ETH`);
-  console.log(`金库     : ${process.env.TREASURY || "0xTREASURY_REDACTED"}`);
+  console.log(`金库     : ${process.env.TREASURY || "（.env 里没设）"}`);
 }
 main().catch((e) => { console.error(e.message); process.exitCode = 1; });
