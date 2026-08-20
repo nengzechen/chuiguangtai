@@ -178,6 +178,26 @@ function buildFigures() {
 
 // ═════════════════════════════════════════════════════ 链上
 
+/**
+ * 还没开台：把读数格上的"连接中"换成实话。
+ *
+ * 留着"连接中"比空着更糟 —— 它是在说"马上就好"，而实际上永远不会好。
+ */
+function sealShut() {
+  const set = (id, text) => {
+    const el = document.getElementById(id);
+    if (el) el.textContent = text;
+  };
+  set("r-embers", "—");
+  set("r-open", "—");
+  set("r-phase", "尚未开台");
+  set("r-phase-note", "还没在链上开凿");
+  set("w-taken", "—");
+  set("w-open", "—");
+  const s = document.getElementById("hero-spec-state");
+  if (s) s.textContent = "尚未开台";
+}
+
 /** 链上状态：读不到也不该让首页开天窗，静默退回静态数字。 */
 async function loadChain() {
   try {
@@ -189,7 +209,10 @@ async function loadChain() {
      * 那个地址在访客的机器上是他自己的电脑，不是我们的链。
      * 请求全部失败，控制台刷满红字，而墙上本来就该是空的。
      */
-    if (notOpenYet(dep)) return;
+    if (notOpenYet(dep)) {
+      sealShut();
+      return;
+    }
 
     const info = CHAINS[dep.chainId];
     if (!info) throw new Error("unknown chain");
