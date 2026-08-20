@@ -3,7 +3,7 @@ import { seatPositions, wallChrome, asterismGlyph } from "./dome.js";
 import { toast } from "./toast.js";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js";
-import { askWallet, confirmDialog, ON_LOCALHOST } from "./shared.js";
+import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet } from "./shared.js";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -209,6 +209,13 @@ async function boot() {
     state.dep = await (await fetch("deployment.json")).json();
   } catch {
     log("读不到这座台的登记信息，观测站可能没在运行。", "bad");
+    document.documentElement.classList.remove("observatory-loading");
+    return;
+  }
+
+  if (notOpenYet(state.dep)) {
+    // 站在公网上，但合约还没上公开的链。老实说，别让人白点一遍登台。
+    sealShut();
     document.documentElement.classList.remove("observatory-loading");
     return;
   }
@@ -977,6 +984,28 @@ async function paintDome() {
       `<path d="${d}" fill="none" stroke-linecap="round"/><g class="mags">${dots}</g></g>`;
   });
   clearFocus();
+}
+
+/**
+ * 还没开台：把所有能按的东西关掉，把话说清楚。
+ * 这一页仍然可读 —— 设定、图鉴、纪年、守则都不依赖链。
+ */
+function sealShut() {
+  const c = $("connect");
+  if (c) {
+    c.textContent = "尚未开台";
+    c.disabled = true;
+    c.title = "垂光台还没在链上开凿";
+  }
+  for (const id of ["claim", "inscribe", "offer"]) {
+    const b = $(id);
+    if (b) { b.disabled = true; b.textContent = "尚未开台"; }
+  }
+  const n = $("netname");
+  if (n) n.textContent = "尚未开台";
+  const p = $("phasechip");
+  if (p) { p.classList.add("sealed"); p.textContent = "尚未开台"; }
+  log("垂光台还没在链上开凿。设定、图鉴、纪年可以先看 —— 开台后再来拾星屑。");
 }
 
 /** 把某个持有者名下的所有刻位一起点亮 —— 那片连起来的光就是"星域"。 */

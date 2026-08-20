@@ -17,8 +17,9 @@ if (!SITE) {
   console.error("要先给 SITE。例：SITE=https://dome.pages.dev npm run site");
   process.exit(1);
 }
-if (!/^https?:\/\/[^/]+$/.test(SITE)) {
-  console.error(`SITE 得是干净的站点根地址，不带路径：${SITE}`);
+// 允许带子路径 —— GitHub Pages 的项目站是 https://用户名.github.io/仓库名
+if (!/^https?:\/\/[^/]+(\/[\w.-]+)*$/.test(SITE)) {
+  console.error(`SITE 得是站点根地址，可以带子路径，但不要带查询串：${SITE}`);
   process.exit(1);
 }
 if (SITE.startsWith("http://") && !SITE.includes("127.0.0.1") && !SITE.includes("localhost")) {
@@ -35,6 +36,9 @@ const PAGES = {
   "observatory.html": "/observatory.html",
 };
 
+// SITE 带子路径时，首页的 "/" 会拼出结尾双斜杠 —— 这里统一收一下
+const url = (route) => (route === "/" ? SITE + "/" : SITE + route);
+
 let touched = 0;
 for (const [file, route] of Object.entries(PAGES)) {
   const p = path.join(WEB, file);
@@ -49,7 +53,7 @@ for (const [file, route] of Object.entries(PAGES)) {
 
   // og:url / twitter:image / canonical 原来没有，缺就补上
   const need = [
-    [`og:url`, `<meta property="og:url" content="${SITE}${route}" />`],
+    [`og:url`, `<meta property="og:url" content="${url(route)}" />`],
     [`twitter:image`, `<meta name="twitter:image" content="${SITE}${OG_IMAGE}" />`],
   ];
   for (const [key, tag] of need) {
@@ -69,12 +73,12 @@ for (const [file, route] of Object.entries(PAGES)) {
   if (s.includes('rel="canonical"')) {
     s = s.replace(
       /<link rel="canonical" href="[^"]*" \/>/,
-      `<link rel="canonical" href="${SITE}${route}" />`
+      `<link rel="canonical" href="${url(route)}" />`
     );
   } else {
     s = s.replace(
       /<link rel="icon" href="favicon.svg"[^>]*\/>/,
-      (m) => `<link rel="canonical" href="${SITE}${route}" />\n${m}`
+      (m) => `<link rel="canonical" href="${url(route)}" />\n${m}`
     );
   }
 
@@ -90,7 +94,7 @@ const urls = ["/", "/observatory.html"].concat(
 fs.writeFileSync(
   path.join(WEB, "sitemap.xml"),
   `<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">\n` +
-    urls.map((u) => `  <url><loc>${SITE}${u}</loc></url>`).join("\n") +
+    urls.map((u) => `  <url><loc>${url(u)}</loc></url>`).join("\n") +
     `\n</urlset>\n`
 );
 fs.writeFileSync(

@@ -14,6 +14,16 @@ const DEMO_KEY =
   "0x59c6995e998f97a5a0044966f0945389dc9e86dae88c7a8412f4603b6b78690d";
 export const DEMO_RPC = "http://127.0.0.1:8545";
 
+/**
+ * 这座台子还没在公开的链上开起来。
+ *
+ * 站已经发出去、但合约还指着本地链的那段时间里，页面必须说实话：
+ * "还没开台"，而不是让人点登台、再被一句"没检测到钱包"打发走 ——
+ * 那句话在人家装了 MetaMask 的时候是彻头彻尾的假话。
+ */
+export const notOpenYet = (dep) =>
+  !ON_LOCALHOST && (!dep || dep.chainId === 31337);
+
 /** 影子钱包只在本机出现。线上任何情况下都不许走这条路。 */
 export const ON_LOCALHOST =
   typeof location !== "undefined" &&

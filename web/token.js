@@ -5,7 +5,7 @@
  * 都该有自己的地址能发出去，而不是只活在一个长页面的抽屉里。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog, ON_LOCALHOST }
+import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog, ON_LOCALHOST, notOpenYet }
   from "./shared.js";
 import { buildCardSvg, svgToPng, download } from "./sharecard.js";
 import { toast } from "./toast.js";
@@ -56,6 +56,10 @@ async function boot() {
 
   try {
     state.dep = await (await fetch("deployment.json")).json();
+    if (notOpenYet(state.dep)) {
+      say("垂光台还没在链上开凿。开台之后这一席才会有内容。");
+      return;
+    }
   } catch {
     say("找不到 deployment.json —— 先运行 npm run deploy:local", "bad");
     return;

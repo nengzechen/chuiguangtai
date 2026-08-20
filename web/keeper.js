@@ -6,7 +6,7 @@
  * 称号、星域、亲手写的字、名下的藏品。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short} from "./shared.js";
+import { CHAINS, short, notOpenYet } from "./shared.js";
 import { buildCardSvg, svgToPng, download } from "./sharecard.js";
 import { seatPositions, wallChrome } from "./dome.js";
 import { toast } from "./toast.js";
@@ -60,6 +60,10 @@ async function boot() {
 
   try {
     state.dep = await (await fetch("deployment.json")).json();
+    if (notOpenYet(state.dep)) {
+      say("垂光台还没在链上开凿。开台之后这里才会有痕迹。");
+      return;
+    }
   } catch {
     say("找不到 deployment.json —— 先运行 npm run deploy:local", "bad");
     return;

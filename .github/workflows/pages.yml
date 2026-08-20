@@ -27,11 +27,10 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-      # enablement: 仓库还没开 Pages 的话，这一步顺手开掉，
-      # 省得部署前还要去仓库设置里手点一次开关
+      # 前提：仓库 Settings → Pages → Source 选 "GitHub Actions"。
+      # 这一步只读取已有配置，建不了新的 Pages 站点 ——
+      # workflow 自带的 GITHUB_TOKEN 没有创建权限（试过，Resource not accessible）。
       - uses: actions/configure-pages@v5
-        with:
-          enablement: true
       - uses: actions/upload-pages-artifact@v3
         with:
           path: web

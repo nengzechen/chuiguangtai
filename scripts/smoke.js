@@ -144,6 +144,31 @@ check("石面上的字够亮（正文 L > 0.65）", () => {
   }
   return out.join(" ");
 });
+check("每个页面用到的共享函数都真的 import 了", () => {
+  // keeper.js 曾经用了 notOpenYet 却没写进 import 里 —— node --check 查不出来，
+  // 页面也不报错，只在跑到那一行时静默失效。这条专门堵这个。
+  const shared = fs.readFileSync(path.join(WEB, "shared.js"), "utf8");
+  const exported = [...shared.matchAll(/^export (?:const|function|async function) (\w+)/gm)]
+    .map((m) => m[1]);
+  const missing = [];
+  for (const f of ["app.js", "token.js", "keeper.js", "landing.js"]) {
+    const src = fs.readFileSync(path.join(WEB, f), "utf8");
+    const imp = src.match(/import\s*\{([^}]*)\}\s*from\s*"\.\/shared\.js"/);
+    const names = imp ? imp[1].split(",").map((x) => x.trim()).filter(Boolean) : [];
+    // 去掉 import 那一行再找用法，免得自己匹配自己
+    const body = src.replace(/import[^;]*;/g, "");
+    for (const name of exported) {
+      const used = new RegExp(`\\b${name}\\b`).test(body);
+      // 页面自己声明了同名的一份就不算漏（app.js 有几个是本地副本）
+      const own = new RegExp(`\\b(?:const|let|var|function)\\s+${name}\\b`).test(body);
+      if (used && !own && !names.includes(name)) {
+        missing.push(`${f} 用了 ${name} 但没 import`);
+      }
+    }
+  }
+  must(missing.length === 0, missing.join("；"));
+  return `${exported.length} 个共享导出，4 个页面都对得上`;
+});
 check("字号走的是刻度，不是随手写的 px", () => {
   const css = allCss();
   const tokens = (css.match(/var\(--t-[a-z0-9]+\)/g) || []).length;
