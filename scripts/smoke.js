@@ -180,7 +180,9 @@ check("前端拼元数据地址的方式和合约一致", () => {
   must(suffix, "合约里找不到 tokenURI 的后缀");
 
   const shared = fs.readFileSync(path.join(WEB, "shared.js"), "utf8");
-  const js = shared.match(/metaUrl\s*=\s*\(dep,\s*id\)\s*=>\s*`\$\{dep\.baseURI\}\$\{id\}([^`]*)`/);
+  // metaUrl 现在可能先过 resolveIpfs、也可能走同域镜像，
+  // 这里只盯住真正要紧的那一段：拼在 id 后面的后缀。
+  const js = shared.match(/metaUrl\s*=[^;]*?\$\{id\}([^`]*)`/s);
   must(js, "shared.js 里找不到 metaUrl");
   must(js[1] === suffix[1], `合约拼的是 "${suffix[1]}"，前端拼的是 "${js[1]}"`);
 
