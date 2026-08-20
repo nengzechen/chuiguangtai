@@ -73,7 +73,10 @@ async function main() {
     chainId: Number((await ethers.provider.getNetwork()).chainId),
     network: network.name,
     explorer: EXPLORERS[network.name] || null,
+    // baseURI 记的是**链上那个**。页面另走 metadataMirror（同域、快、不靠网关），
+    // 两者内容同源，只是前缀不同。哪天不一致了，preflight 会喊。
     baseURI: base,
+    metadataMirror: process.env.METADATA_MIRROR || base,
     abi: artifact.abi,
   };
 

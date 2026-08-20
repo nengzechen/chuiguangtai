@@ -31,7 +31,15 @@ export const notOpenYet = (dep) =>
  * 后缀却漏了前端这三处，页面直接 404 —— 所以现在只留这一个拼法，
  * 三个页面都从这儿拿，想再走岔也没地方岔。
  */
-export const metaUrl = (dep, id) => `${dep.baseURI}${id}.json`;
+export const metaUrl = (dep, id) => resolveIpfs(dep.metadataMirror || dep.baseURI) + `${id}.json`;
+
+/**
+ * ipfs:// 浏览器打不开，得走网关。
+ * 同域有镜像时优先走镜像 —— 网关慢而且时不时抽风，
+ * 而镜像和链上指的是同一批内容（同一次生成，只是换了个前缀）。
+ */
+export const resolveIpfs = (u) =>
+  u.startsWith("ipfs://") ? `https://ipfs.filebase.io/ipfs/${u.slice(7)}` : u;
 
 /** 影子钱包只在本机出现。线上任何情况下都不许走这条路。 */
 export const ON_LOCALHOST =

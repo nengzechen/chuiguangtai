@@ -73,6 +73,52 @@ if (dep) {
     });
   }
 
+  // ── 2.5 链上的 baseURI 和这个文件记的对不对得上
+  checks.push(async () => {
+    const RPC = {
+      4663: "https://rpc.mainnet.chain.robinhood.com",
+      46630: "https://rpc.testnet.chain.robinhood.com",
+    }[dep.chainId];
+    if (!RPC) return;
+    const call = async (data) => {
+      const r = await fetch(RPC, {
+        method: "POST", headers: { "content-type": "application/json" },
+        body: JSON.stringify({ jsonrpc: "2.0", id: 1, method: "eth_call",
+          params: [{ to: dep.address, data }, "latest"] }),
+      }).then((x) => x.json());
+      // 手工解 ABI 的 string 返回：偏移 + 长度 + 内容
+      const hex = (r.result || "").slice(2);
+      const len = parseInt(hex.slice(64, 128), 16);
+      return Buffer.from(hex.slice(128, 128 + len * 2), "hex").toString("utf8");
+    };
+    // tokenURI(1) 反推 baseURI —— 合约没有直接读 baseURI 的接口
+    const uri = await call("0xc87b56dd" + (1).toString(16).padStart(64, "0"));
+    const onchain = uri.replace(/1\.json$/, "");
+    if (onchain === dep.baseURI) {
+      ok(`链上 baseURI 和 deployment.json 一致`);
+    } else {
+      fail(`链上是 ${onchain}，deployment.json 写的是 ${dep.baseURI}`,
+           "改完 baseURI 记得同步 deployment.json，否则页面和链各说各的");
+    }
+
+    // 镜像必须和链上同源同内容
+    if (dep.metadataMirror && dep.metadataMirror !== dep.baseURI) {
+      const gw = (u) => u.startsWith("ipfs://")
+        ? `https://ipfs.filebase.io/ipfs/${u.slice(7)}` : u;
+      const [a, b] = await Promise.all(
+        [gw(onchain), dep.metadataMirror].map((base) =>
+          fetch(base + "10001.json", { signal: AbortSignal.timeout(30000) })
+            .then((r) => r.json()).catch(() => null))
+      );
+      if (!a || !b) return soft("镜像比对没取到内容，跳过", "网关可能在抽风，稍后重试");
+      const same = a.name === b.name &&
+        JSON.stringify(a.attributes) === JSON.stringify(b.attributes);
+      same
+        ? ok("同域镜像和链上是同一份内容")
+        : fail("镜像和链上的内容对不上", "重新生成并重传，两边必须同源");
+    }
+  });
+
   // ── 3. baseURI 必须是公网可达的绝对地址
   const b = dep.baseURI || "";
   if (/127\.0\.0\.1|localhost/.test(b)) {
