@@ -414,6 +414,34 @@ contract Observatory is ERC721, ERC2981, Ownable {
     }
 
     /**
+     * @notice tokenURI = baseURI + tokenId + ".json"
+     * @dev 后缀是为静态托管加的。没有扩展名的文件，GitHub Pages 之类的
+     *      静态服务器只会给 application/octet-stream ——
+     *      内容是对的 JSON，但类型是错的，严格一点的索引器会直接跳过。
+     *      IPFS 那边加不加都能读，所以两种托管方式都用同一套名字。
+     */
+    function tokenURI(uint256 tokenId)
+        public
+        view
+        override
+        returns (string memory)
+    {
+        _requireOwned(tokenId);
+        return string.concat(_base, _toString(tokenId), ".json");
+    }
+
+    /// @dev 只为拼 tokenURI 用，不值得为它引一整个 Strings 库。
+    function _toString(uint256 v) private pure returns (string memory) {
+        if (v == 0) return "0";
+        uint256 n = v;
+        uint256 len;
+        while (n != 0) { len++; n /= 10; }
+        bytes memory buf = new bytes(len);
+        while (v != 0) { buf[--len] = bytes1(uint8(48 + (v % 10))); v /= 10; }
+        return string(buf);
+    }
+
+    /**
      * @dev 每次星座易主都在这里留痕：更新持有量、刷新穹顶名册、往刻痕志追加一条
      *      空白记录等新主人来填。星屑不走这套 —— 它没有刻痕志。
      */

@@ -706,7 +706,7 @@ function main() {
     const { svg, metadata } = buildEmber(id, base);
     fs.writeFileSync(path.join(IMG, "ember", `${id}.svg`), svg);
     // tokenURI = baseURI + tokenId，所以文件名不带扩展名
-    fs.writeFileSync(path.join(OUT, String(id)), JSON.stringify(metadata, null, 2));
+    fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
     const k = metadata.attributes[1].value;
     tally[k] = (tally[k] || 0) + 1;
   }
@@ -714,7 +714,7 @@ function main() {
   for (let ordinal = 1; ordinal <= CONSTELLATION_SUPPLY; ordinal++) {
     const { svg, metadata, id } = buildConstellation(ordinal, base);
     fs.writeFileSync(path.join(IMG, "constellation", `${ordinal}.svg`), svg);
-    fs.writeFileSync(path.join(OUT, String(id)), JSON.stringify(metadata, null, 2));
+    fs.writeFileSync(path.join(OUT, `${id}.json`), JSON.stringify(metadata, null, 2));
   }
 
   // 前端一次读完 88 个刻位的名字/天区，省掉 88 次请求

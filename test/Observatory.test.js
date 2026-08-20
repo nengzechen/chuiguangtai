@@ -300,8 +300,15 @@ describe("Observatory 垂光台", function () {
       await readyToInscribe(dome, alice);
       await dome.connect(alice).inscribeConstellation({ value: PRICE });
 
-      expect(await dome.tokenURI(1)).to.equal(BASE + "1");
-      expect(await dome.tokenURI(10001)).to.equal(BASE + "10001");
+      // 后缀是给静态托管用的：没有扩展名就拿不到 application/json
+      expect(await dome.tokenURI(1)).to.equal(BASE + "1.json");
+      expect(await dome.tokenURI(10001)).to.equal(BASE + "10001.json");
+    });
+
+    it("tokenURI 对不存在的编号会 revert", async function () {
+      const { dome } = await loadFixture(deploy);
+      await expect(dome.tokenURI(9999))
+        .to.be.revertedWithCustomError(dome, "ERC721NonexistentToken");
     });
 
     it("tierOf 的边界正确", async function () {
@@ -390,7 +397,7 @@ describe("Observatory 垂光台", function () {
       await dome.connect(alice).claimEmbers(1);
 
       await dome.setBaseURI("ipfs://revealed/");
-      expect(await dome.tokenURI(1)).to.equal("ipfs://revealed/1");
+      expect(await dome.tokenURI(1)).to.equal("ipfs://revealed/1.json");
     });
   });
 

@@ -101,7 +101,7 @@ for (const f of ["_headers", "_redirects", ".nojekyll", "robots.txt", "sitemap.x
 
 // ── 8. 元数据齐不齐
 const metaDir = path.join(WEB, "metadata");
-const n = fs.existsSync(metaDir) ? fs.readdirSync(metaDir).filter((f) => /^\d+$/.test(f)).length : 0;
+const n = fs.existsSync(metaDir) ? fs.readdirSync(metaDir).filter((f) => /^\d+\.json$/.test(f)).length : 0;
 n >= 2136 ? ok(`元数据 ${n} 份`) : fail(`元数据只有 ${n} 份，应该 2136`, "npm run metadata");
 
 console.log("─".repeat(46));

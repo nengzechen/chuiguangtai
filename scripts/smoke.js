@@ -59,13 +59,13 @@ for (const f of [
 console.log("\n元数据");
 check("星屑 1..2048 全在", () => {
   for (let i = 1; i <= EMBER_SUPPLY; i++) {
-    must(exists(path.join(META, String(i))), `缺 token ${i}`);
+    must(exists(path.join(META, `${i}.json`)), `缺 token ${i}`);
   }
   return `${EMBER_SUPPLY} 个`;
 });
 check("星座 10001..10088 全在", () => {
   for (let i = 1; i <= CON_SUPPLY; i++) {
-    must(exists(path.join(META, String(CON_OFFSET + i))), `缺 token ${CON_OFFSET + i}`);
+    must(exists(path.join(META, `${CON_OFFSET + i}.json`)), `缺 token ${CON_OFFSET + i}`);
   }
   return `${CON_SUPPLY} 个`;
 });
@@ -95,7 +95,7 @@ console.log("\n稀有度分布");
 check("七档都存在且比例合理", () => {
   const tally = {};
   for (let i = 1; i <= EMBER_SUPPLY; i++) {
-    const m = JSON.parse(fs.readFileSync(path.join(META, String(i)), "utf8"));
+    const m = JSON.parse(fs.readFileSync(path.join(META, `${i}.json`), "utf8"));
     const g = m.attributes.find((a) => a.trait_type === "稀有度").value;
     tally[g] = (tally[g] || 0) + 1;
   }
