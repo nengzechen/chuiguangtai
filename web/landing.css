@@ -168,14 +168,10 @@ body.wallside::after {
   font: var(--t-3xs)/1 var(--mono); font-style: normal;
   letter-spacing: var(--ls-widest); color: var(--lime-faint);
 }
-.deck-nav { display: flex; gap: var(--s5); margin-left: auto; }
-.deck-nav a {
-  font: var(--t-xs)/1 var(--sans); color: var(--lime-low);
-  text-decoration: none; padding-bottom: 4px;
-  border-bottom: 1px solid transparent; transition: color .2s, border-color .2s;
-}
-.deck-nav a:hover { color: var(--lime); border-bottom-color: var(--seal); }
-@media (max-width: 900px) { .deck-nav { display: none; } }
+/* 顶栏那组重复的章节链接删掉了（顶端的进度条已经列了同样六节），
+   把人推到右边的活儿原来是那组链接的 margin-left:auto 干的，
+   现在交给按钮自己 —— 少一个元素，右对齐不能跟着一起没了 */
+.deck > .btn { margin-left: auto; }
 @media (max-width: 560px) { .mark-txt i { display: none; } }
 
 /* ═══════════════════════════════════════════ 段 */
