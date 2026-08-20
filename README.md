@@ -196,8 +196,13 @@ npm run whoami -- --network robinhoodTestnet   # 确认钥匙、网络、余额
 发布命令：
 
 ```bash
-git subtree push --prefix web origin gh-pages
+./scripts/publish.sh
 ```
+
+不用 `git subtree push` —— 历史被 `filter-repo` 改写过之后它会拿改写前的映射缓存，
+报 `Everything up-to-date` 而线上其实是旧的。不报错、不留痕，
+只有去 diff 两边的树才看得出来。`publish.sh` 直接拿 `main:web` 那棵树造提交，
+推完还会再比对一次。
 
 `.github/workflows/pages.yml` 也留着 —— 在仓库 Settings → Pages 里把 Source
 改成 GitHub Actions，它就接管，之后 push main 即自动发布。
