@@ -4,7 +4,7 @@ import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
 import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl,
-  IS_MOBILE, openWalletSheet, injectedProvider } from "./shared.js?v=7fac73ed";
+  IS_MOBILE, openWalletSheet, injectedProvider, noticeDialog } from "./shared.js?v=ebcbb2a2";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -667,6 +667,33 @@ async function readOnlySurvey() {
   }
 }
 
+/**
+ * 登台失败要让人看见。
+ *
+ * 这些路径以前只写 log ——而控制台在页面底部，用户点的是右上角的按钮，
+ * 眼睛还在按钮上，反馈却出现在两屏之外，看起来就是"点了没反应"。
+ * toast.js 开头那段话说的就是这件事，只是当时没落到这里。
+ */
+function failLoud(short, detail) {
+  log(detail || short, "bad");
+  toast(short, "bad");
+}
+
+/** 桌面上没有钱包插件时的说明。toast 只闪一下，装不下这段话。 */
+function openNoWalletHint() {
+  noticeDialog({
+    title: "没检测到钱包插件",
+    body:
+      "这一页需要一个浏览器钱包（比如 MetaMask）才能登台。\n\n" +
+      "如果你已经装了，多半是因为在无痕窗口里 —— Chrome 默认不让扩展在无痕模式下运行，" +
+      "所以页面根本看不到它。两条路：\n\n" +
+      "· 打开 chrome://extensions，找到 MetaMask，开启「在无痕模式下启用」\n" +
+      "· 或者换一个普通窗口打开这一页\n\n" +
+      "还没装钱包的话，先装一个再回来。",
+    ok: "知道了",
+  });
+}
+
 async function connect({ silent }) {
   // 钱包在授权/切链时可能连续触发 accountsChanged 和 chainChanged。
   // 同一时间只允许一条连接流程写 UI，避免按钮、阶段和统计值来回重绘。
@@ -695,7 +722,7 @@ async function connectFlow({ silent }) {
         ? await browser.send("eth_accounts", [])
         : await askWallet(injectedProvider());
       if (!accts.length) {
-        if (!silent) log("钱包里没有可用账户", "bad");
+        if (!silent) failLoud("钱包里没有可用账户");
         return;
       }
       const net = await browser.getNetwork();
@@ -709,7 +736,7 @@ async function connectFlow({ silent }) {
       state.account = await state.signer.getAddress();
       state.demo = false;
     } catch (e) {
-      if (!silent) log(readOmen(e), "bad");
+      if (!silent) failLoud(readOmen(e));
       return;
     }
   } else {
@@ -720,10 +747,21 @@ async function connectFlow({ silent }) {
        * 给一层"在钱包里打开"，把这一页深链进钱包的浏览器。
        */
       if (IS_MOBILE) {
-        log("手机上要在钱包 App 里打开这一页。", "bad");
+        failLoud("手机上要在钱包 App 里打开这一页");
         openWalletSheet();
       } else {
-        log("没检测到钱包。装一个 MetaMask 再登台。", "bad");
+        /*
+         * 别再说"装一个 MetaMask"—— 最常撞上这条的人其实**装了**，
+         * 只是在无痕窗口里：Chrome 默认不让扩展在无痕模式下运行，
+         * 所以 window.ethereum 根本不会被注入。
+         * 无痕本身探测不可靠也不该探测，所以两种情况一起说清楚。
+         */
+        failLoud(
+          "没检测到钱包插件",
+          "没检测到钱包插件。如果你已经装了 MetaMask：无痕窗口里扩展默认是关的 —— " +
+          "去 chrome://extensions 找到它，打开「在无痕模式下启用」，或者换普通窗口打开这一页。"
+        );
+        openNoWalletHint();
       }
       return;
     }
