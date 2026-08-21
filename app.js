@@ -4,7 +4,7 @@ import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
 import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl,
-  IS_MOBILE, openWalletSheet, injectedProvider, noticeDialog } from "./shared.js?v=ebcbb2a2";
+  IS_MOBILE, openWalletSheet, injectedProvider, noticeDialog, warnIfStale, staleBanner } from "./shared.js?v=66b4a74a";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -211,6 +211,12 @@ async function boot() {
   } catch {
     log("读不到这座台的登记信息，观测站可能没在运行。", "bad");
     document.documentElement.classList.remove("observatory-loading");
+
+  // 手里这份页面是不是缓存的旧版 —— 是的话当场说，别让人对着上一版的行为发懵
+  warnIfStale(() => {
+    staleBanner();
+    log("检测到你手里这份页面不是最新的（浏览器缓存）。点顶部那条横幅上的【刷新】。", "bad");
+  });
     return;
   }
 
@@ -218,6 +224,12 @@ async function boot() {
     // 站在公网上，但合约还没上公开的链。老实说，别让人白点一遍登台。
     sealShut();
     document.documentElement.classList.remove("observatory-loading");
+
+  // 手里这份页面是不是缓存的旧版 —— 是的话当场说，别让人对着上一版的行为发懵
+  warnIfStale(() => {
+    staleBanner();
+    log("检测到你手里这份页面不是最新的（浏览器缓存）。点顶部那条横幅上的【刷新】。", "bad");
+  });
     return;
   }
 
@@ -245,6 +257,12 @@ async function boot() {
   localStorage.removeItem(DISCONNECT_FLAG);   // 清掉旧版本留在浏览器里的那条记录
   log("还没登台。要拾星屑或铭刻，先点右上角【登台】。");
   document.documentElement.classList.remove("observatory-loading");
+
+  // 手里这份页面是不是缓存的旧版 —— 是的话当场说，别让人对着上一版的行为发懵
+  warnIfStale(() => {
+    staleBanner();
+    log("检测到你手里这份页面不是最新的（浏览器缓存）。点顶部那条横幅上的【刷新】。", "bad");
+  });
 
   // 看得晚也无所谓的，等浏览器闲一下再拉。
   // 但必须给 timeout —— 星野 canvas 每帧都在 rAF，浏览器几乎没有真正的空闲期，

@@ -376,3 +376,45 @@ export function noticeDialog({ title, body, ok = "知道了" }) {
     if (no) no.hidden = wasHidden ?? false;
   });
 }
+
+/**
+ * 手里这份 HTML 是不是缓存里的旧版。
+ *
+ * 资源有内容指纹，所以 JS/CSS 不会拿错；但 HTML 本身管不了 ——
+ * GitHub Pages 发 max-age=600 且不读 _headers，于是发布后十分钟内，
+ * 回头客拿到的 HTML 还是旧的，它引用的自然也是旧的 JS。
+ * 页面看着正常，行为却是上一版的：不报错、不留痕，
+ * 用户只会说"你不是说修好了吗"。
+ *
+ * build.json 用 no-store 拉，绕开 HTTP 缓存拿到当前构建号；
+ * 和 HTML 里那个对不上，就说明这一份是旧的。
+ */
+/** 顶部那条"页面是旧的"横幅。它得一直在 —— 这不是一闪而过的事。 */
+export function staleBanner() {
+  if (document.getElementById("stalebar")) return;
+  const bar = document.createElement("div");
+  bar.id = "stalebar";
+  bar.className = "stalebar";
+  bar.innerHTML = `<span>你看到的是缓存里的旧版本，行为可能和最新的不一样。</span>
+    <button type="button" data-reload>刷新</button>`;
+  document.body.appendChild(bar);
+  bar.addEventListener("click", (e) => {
+    if (e.target.closest("[data-reload]")) {
+      // 带一个一次性参数，绕开那份被缓存的 HTML
+      const u = new URL(location.href);
+      u.searchParams.set("_", Date.now().toString(36));
+      location.replace(u.toString());
+    }
+  });
+}
+
+export async function warnIfStale(onStale) {
+  try {
+    const mine = document.documentElement.dataset.build;
+    if (!mine) return;
+    const r = await fetch("build.json", { cache: "no-store" });
+    if (!r.ok) return;
+    const { build } = await r.json();
+    if (build && build !== mine) onStale(build, mine);
+  } catch { /* 拉不到就算了，这只是个体检，不该拦住任何事 */ }
+}
