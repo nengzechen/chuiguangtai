@@ -193,6 +193,13 @@ npm run whoami -- --network robinhoodTestnet   # 确认钥匙、网络、余额
 没有后端、没有数据库、没有构建产物，所以静态托管就够。
 
 现在跑在 **GitHub Pages** 上（`gh-pages` 分支，根目录），全站 32MB。
+
+> **GitHub Pages 不读 `web/_headers`** —— 那是 Cloudflare Pages 的格式，
+> 在这里它只是一个能被直接下载的普通文件。所以仓库里那份 CSP 和缓存策略
+> **目前并没有生效**，HTML 由 GitHub 自己按 `max-age=600` 缓存。
+> 改完页面后自己看不到变化，先等 10 分钟或强制刷新（⌘⇧R）。
+> 静态资源不受影响：JS/CSS 带内容指纹，一改就换名字。
+> 想让 `_headers` 真正生效，就得搬到 Cloudflare Pages。
 发布命令：
 
 ```bash

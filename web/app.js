@@ -890,11 +890,8 @@ function paintSurvey(s, { anonymous }) {
     return;
   }
 
-  // 登台之后要把"去登台"那身打扮脱掉 —— 加了没人摘的话，
-  // 连上钱包后按钮还挂着虚线边和朱砂字，看着像还差一步。
-  for (const id of ["claim", "inscribe", "offer"]) {
-    $(id)?.classList.remove("needs-connect");
-  }
+  // 登台之后：摘掉"去登台"那身打扮，并把按钮真正的动作装回去。
+  for (const id of ["claim", "inscribe", "offer"]) restoreAction($(id));
 
   const room = roomNow();
   setQty(Math.min(state.qty, Math.max(room, 1)));
@@ -948,21 +945,30 @@ function paintSurvey(s, { anonymous }) {
   } else if (mine === 0) {
     card.classList.add("locked");
     setGate(false, "先拾一枚星屑，才能铭刻。观星台不认钱，只认你来过。");
-    disable(ins, "需先拾取星屑");
-    disable(offer, `需先拾满 ${EMBERS_PER_SEAT} 枚星屑`);
+    /*
+     * 这一档和"穹顶已满""还没开台"不一样：它是**用户自己能解决**的。
+     * 所以不能给一个 disabled 的死按钮 —— 那等于告诉人此路不通，
+     * 而真相是路在旁边那张卡上。点下去就把他带过去。
+     */
+    pointTo(ins, "先拾一枚星屑 →", "要铭刻，得先亲手拾一枚星屑。");
+    pointTo(offer, `先拾满 ${EMBERS_PER_SEAT} 枚星屑 →`,
+      `换席要亲手拾满 ${EMBERS_PER_SEAT} 枚，每天 2 枚。`);
   } else {
     card.classList.remove("locked");
     setGate(true, `你亲手拾过 ${mine} 枚星屑，够了。还剩 ${conLeft} 个刻位。`);
+    restoreAction(ins);
     ins.disabled = false;
     ins.textContent = `献纳铭刻 · ${ethers.formatEther(s.price)} ETH`;
 
     if (canOffer) {
+      restoreAction(offer);
       offer.disabled = false;
       offer.textContent = `交出 ${EMBERS_PER_SEAT} 枚星屑`;
     } else if (freeLeft === 0) {
       disable(offer, "换完了 · 22 席已满");
     } else if (mine < EMBERS_PER_SEAT) {
-      disable(offer, `还差 ${EMBERS_PER_SEAT - mine} 枚 · 每天 2 枚`);
+      pointTo(offer, `还差 ${EMBERS_PER_SEAT - mine} 枚 →`,
+        `还差 ${EMBERS_PER_SEAT - mine} 枚，每天最多拾 2 枚。`);
     } else {
       disable(offer, `手里只剩 ${held} 枚`);
     }
@@ -970,7 +976,11 @@ function paintSurvey(s, { anonymous }) {
 
 }
 
-const disable = (btn, text) => { btn.disabled = true; btn.textContent = text; };
+const disable = (btn, text) => {
+  restoreAction(btn);
+  btn.disabled = true;
+  btn.textContent = text;
+};
 
 /**
  * 还没登台就想动手 —— 先把登台流程拉起来，别只丢一句话。
@@ -979,6 +989,44 @@ const disable = (btn, text) => { btn.disabled = true; btn.textContent = text; };
 function needConnectFirst(what) {
   log(`要${what}，先登台。`);
   return connect();
+}
+
+/**
+ * 差一步才能用的按钮：保持可点，点了把人带到该去的地方。
+ *
+ * 用 disabled 表达"你还缺点什么"是不对的：disabled 的按钮不派发 click，
+ * 于是点下去毫无反应、毫无解释 —— 而这里缺的东西用户自己就能补上。
+ * disabled 只留给真正没得做的状态（还没开台、穹顶已满、你已经刻过了）。
+ */
+/* 每个按钮真正的动作。pointTo / askConnectOn 会临时改写 onclick，
+   状态一旦转好必须装回来 —— 不然拾到星屑之后点【献纳铭刻】
+   还是在滚屏，而那比"没反应"更糟：它看着像成功了。 */
+const REAL_ACTION = {
+  claim: () => claimEmbers(),
+  inscribe: () => inscribe(),
+  offer: () => offerEmbers(),
+};
+function restoreAction(btn) {
+  if (!btn) return;
+  btn.classList.remove("needs-connect");
+  const fn = REAL_ACTION[btn.id];
+  if (fn) btn.onclick = fn;
+}
+
+function pointTo(btn, label, why) {
+  if (!btn) return;
+  btn.disabled = false;
+  btn.textContent = label;
+  btn.classList.add("needs-connect");
+  btn.onclick = () => {
+    log(why);
+    const sec = $("ember-sec");
+    if (sec) {
+      sec.scrollIntoView({ block: "center" });
+      sec.classList.add("flash");
+      setTimeout(() => sec.classList.remove("flash"), 1200);
+    }
+  };
 }
 
 /** 未登台时的按钮：看得出来能点，点了就去登台。 */

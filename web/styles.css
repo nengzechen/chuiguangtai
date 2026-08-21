@@ -628,6 +628,16 @@ h1 {
 }
 .btn.needs-connect:hover { background: var(--seal-wash); }
 
+/* 被"去那边"指过去的那张卡，闪一下告诉人该看哪儿。
+   只有一次、很短 —— 长了就成了装饰。 */
+.flash { animation: flash-once 1.1s ease-out 1; }
+@keyframes flash-once {
+  0%   { box-shadow: 0 0 0 0 var(--rule-seal); }
+  30%  { box-shadow: 0 0 0 3px var(--rule-seal); }
+  100% { box-shadow: 0 0 0 0 oklch(0.52 0.172 32 / 0); }
+}
+@media (prefers-reduced-motion: reduce) { .flash { animation: none; } }
+
 .btn.ghost { border-color: var(--rule-strong); color: var(--lime-low); }
 .btn.ghost:hover { color: var(--lime); border-color: var(--seal); background: transparent; }
 .btn.small { padding: 6px 12px; font-size: var(--t-xs); }
