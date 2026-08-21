@@ -6,7 +6,7 @@
  * 首页的唯一任务是让人看懂"位置有限，而且正在减少"。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, notOpenYet } from "./shared.js?v=873cf7d4";
+import { CHAINS, notOpenYet } from "./shared.js?v=7fac73ed";
 import { TIMELINE } from "./content.js?v=2c67cd39";
 import { asterismSvg, RINGS, regionOf } from "./dome.js?v=85c127cd";
 

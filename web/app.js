@@ -4,7 +4,7 @@ import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
 import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl,
-  IS_MOBILE, openWalletSheet } from "./shared.js?v=873cf7d4";
+  IS_MOBILE, openWalletSheet, injectedProvider } from "./shared.js?v=7fac73ed";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -570,8 +570,8 @@ function bindUI() {
     }
   });
 
-  if (window.ethereum) {
-    window.ethereum.on?.("accountsChanged", (a) => {
+  if (injectedProvider()) {
+    injectedProvider().on?.("accountsChanged", (a) => {
       if (!a.length) return disconnect({ silent: true });
       log("检测到换了一双手，重新登台");
       connect({ silent: true });
@@ -591,12 +591,12 @@ function bindUI() {
      */
     let lastChain = null;
     const booted = Date.now();
-    window.ethereum
+    injectedProvider()
       .request?.({ method: "eth_chainId" })
       .then((c) => { lastChain = c; })
       .catch(() => {});
 
-    window.ethereum.on?.("chainChanged", (cid) => {
+    injectedProvider().on?.("chainChanged", (cid) => {
       if (cid === lastChain) return;
       if (Date.now() - booted < 1500) { lastChain = cid; return; }
       lastChain = cid;
@@ -682,8 +682,8 @@ async function connect({ silent }) {
 async function connectFlow({ silent }) {
   const { chainId } = state.dep;
 
-  if (window.ethereum) {
-    const browser = new ethers.BrowserProvider(window.ethereum);
+  if (injectedProvider()) {
+    const browser = new ethers.BrowserProvider(injectedProvider());
     try {
       /*
        * 手动点【登台】时走 askWallet：它会把钱包的授权弹窗重新拉起来。
@@ -693,7 +693,7 @@ async function connectFlow({ silent }) {
        */
       const accts = silent
         ? await browser.send("eth_accounts", [])
-        : await askWallet(window.ethereum);
+        : await askWallet(injectedProvider());
       if (!accts.length) {
         if (!silent) log("钱包里没有可用账户", "bad");
         return;
@@ -715,7 +715,7 @@ async function connectFlow({ silent }) {
   } else {
     if (!CHAINS[chainId]?.local || !ON_LOCALHOST) {
       /*
-       * 手机浏览器不注入 window.ethereum，只有钱包 App 自带的浏览器才有。
+       * 手机浏览器不注入钱包，只有钱包 App 自带的浏览器才有。
        * 所以这里不能只说"没检测到钱包"就完 —— 那是把人堵死在门口。
        * 给一层"在钱包里打开"，把这一页深链进钱包的浏览器。
        */
@@ -760,7 +760,7 @@ async function disconnect({ silent } = {}) {
   }
 
   try {
-    await window.ethereum?.request?.({
+    await injectedProvider()?.request?.({
       method: "wallet_revokePermissions",
       params: [{ eth_accounts: {} }],
     });
@@ -794,11 +794,11 @@ async function switchChain(chainId) {
   const info = CHAINS[chainId];
   if (!info) throw new Error(`未知网络 ${chainId}`);
   try {
-    await window.ethereum.request({
+    await injectedProvider().request({
       method: "wallet_switchEthereumChain", params: [{ chainId: hex }],
     });
   } catch {
-    await window.ethereum.request({
+    await injectedProvider().request({
       method: "wallet_addEthereumChain",
       params: [{
         chainId: hex,
@@ -808,7 +808,7 @@ async function switchChain(chainId) {
         ...(info.explorer ? { blockExplorerUrls: [info.explorer] } : {}),
       }],
     });
-    await window.ethereum.request({
+    await injectedProvider().request({
       method: "wallet_switchEthereumChain", params: [{ chainId: hex }],
     });
   }

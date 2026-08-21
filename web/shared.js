@@ -212,16 +212,28 @@ export const IS_MOBILE =
   (/android|iphone|ipad|ipod/i.test(navigator.userAgent) ||
     (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
 
-/** 各家钱包把外部链接接进自带浏览器的写法。 */
+/**
+ * 各家钱包把外部链接接进自带浏览器的写法。
+ *
+ * 前四家用的是 https 通用链接：装了就跳 App，没装就落到它们的网页，
+ * 无论如何不会"点了没反应"。
+ *
+ * 币安是自定义 scheme（bnc://），而币安官方文档并没有公开
+ * "打开任意 dApp 网址"这个深链的格式 —— 我用的是社区在传的那个。
+ * 自定义 scheme 打不开时浏览器是**静默失败**的，所以它单独标了 fallback：
+ * 跳转发起后如果页面还在原地，就把手动步骤摊给用户看。
+ */
 function walletLinks() {
   const full = location.href;
   const bare = location.host + location.pathname + location.search; // MetaMask 要不带协议的
   const enc = encodeURIComponent(full);
   return [
-    ["MetaMask", `https://metamask.app.link/dapp/${bare}`],
-    ["Trust Wallet", `https://link.trustwallet.com/open_url?coin_id=60&url=${enc}`],
-    ["Coinbase Wallet", `https://go.cb-w.com/dapp?cb_url=${enc}`],
-    ["imToken", `imtokenv2://navigate/DappView?url=${enc}`],
+    { name: "币安 Binance", href: `bnc://app.binance.com/cedefi/dapp?url=${enc}`,
+      fallback: "在币安 App 里：钱包 → Web3 → 发现 → 把链接粘进地址栏" },
+    { name: "MetaMask", href: `https://metamask.app.link/dapp/${bare}` },
+    { name: "Trust Wallet", href: `https://link.trustwallet.com/open_url?coin_id=60&url=${enc}` },
+    { name: "Coinbase Wallet", href: `https://go.cb-w.com/dapp?cb_url=${enc}` },
+    { name: "imToken", href: `imtokenv2://navigate/DappView?url=${enc}` },
   ];
 }
 
@@ -242,9 +254,10 @@ export function openWalletSheet() {
       <p class="wsheet-b">手机浏览器里没有钱包。选一个你装了的，
         这一页会在它自带的浏览器里重新打开，那里才登得上台。</p>
       <div class="wsheet-list">
-        ${walletLinks().map(([name, href]) =>
-          `<a class="wsheet-item" href="${href}" rel="noopener">${name}</a>`).join("")}
+        ${walletLinks().map((w, i) =>
+          `<a class="wsheet-item" href="${w.href}" rel="noopener" data-w="${i}">${w.name}</a>`).join("")}
       </div>
+      <p class="wsheet-fallback" id="wsheet-fb" hidden></p>
       <button class="wsheet-copy" data-wcopy>复制链接，粘到任何钱包的浏览器里</button>
       <button class="btn ghost small wsheet-x" data-wclose>取消</button>
     </div>`;
@@ -261,6 +274,38 @@ export function openWalletSheet() {
 
   box.addEventListener("click", async (e) => {
     if (e.target.closest("[data-wclose]")) return close();
+
+    /*
+     * 自定义 scheme（bnc:// 这类）跳不动时，浏览器什么都不说。
+     * 所以点完等一拍：页面还在、还可见，就说明 App 没接住，
+     * 把手动步骤摊出来 —— 总比让人对着没反应的按钮再点五次强。
+     */
+    const item = e.target.closest("[data-w]");
+    if (item) {
+      const w = walletLinks()[Number(item.dataset.w)];
+      if (w?.fallback) {
+        /*
+         * 判据是"有没有切走"，不是"此刻可不可见"。
+         * 直接读 document.hidden 有个坑：有些环境（后台标签页、
+         * 某些内嵌 WebView）一直报 hidden，那样这条提示永远不会出现，
+         * 用户就对着一个没反应的按钮干瞪眼。
+         * 所以记下点击那一刻的状态，只有**从可见变成不可见**
+         * 才算 App 真的接住了；其余情况一律把手动步骤给出来。
+         */
+        const wasVisible = !document.hidden;
+        let wentAway = false;
+        const onVis = () => { if (wasVisible && document.hidden) wentAway = true; };
+        document.addEventListener("visibilitychange", onVis);
+        setTimeout(() => {
+          document.removeEventListener("visibilitychange", onVis);
+          if (wentAway) return;                                  // 跳成功了
+          if (!document.getElementById("wsheet")) return;         // 用户自己关了
+          const fb = document.getElementById("wsheet-fb");
+          if (fb) { fb.textContent = w.fallback; fb.hidden = false; }
+        }, 1500);
+      }
+      return;
+    }
     const copy = e.target.closest("[data-wcopy]");
     if (copy) {
       try {
@@ -277,3 +322,42 @@ export function openWalletSheet() {
     }
   });
 }
+
+/**
+ * 找出页面里注入的钱包。
+ *
+ * 不能只看 window.ethereum。币安 App 自带的浏览器把 provider 挂在
+ * window.binancew3w.ethereum 上 —— 只认 window.ethereum 的话，
+ * 用户明明是在币安钱包里打开的这一页，我们却告诉他"没检测到钱包"。
+ *
+ * 顺带支持 EIP-6963（多钱包共存时各家用事件宣告自己，
+ * 而不是抢 window.ethereum 这一个位置）。
+ */
+export function injectedProvider() {
+  if (typeof window === "undefined") return null;
+  return (
+    window.ethereum ||
+    window.binancew3w?.ethereum ||
+    eip6963Provider() ||
+    null
+  );
+}
+
+/** EIP-6963：向页面喊一声，谁在就应一声。同步拿上一轮收到的。 */
+let _announced = [];
+if (typeof window !== "undefined") {
+  addEventListener("eip6963:announceProvider", (e) => {
+    if (e.detail?.provider && !_announced.some((p) => p.provider === e.detail.provider)) {
+      _announced.push(e.detail);
+    }
+  });
+  dispatchEvent(new Event("eip6963:requestProvider"));
+}
+function eip6963Provider() {
+  return _announced[0]?.provider || null;
+}
+
+/** 这一页是不是在币安 App 自带的浏览器里打开的。 */
+export const IN_BINANCE =
+  typeof window !== "undefined" &&
+  (!!window.binancew3w?.ethereum || !!window.ethereum?.isBinance);
