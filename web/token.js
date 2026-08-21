@@ -5,8 +5,9 @@
  * 都该有自己的地址能发出去，而不是只活在一个长页面的抽屉里。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl }
-  from "./shared.js?v=402f1252";
+import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog,
+  ON_LOCALHOST, notOpenYet, metaUrl, IS_MOBILE, openWalletSheet }
+  from "./shared.js?v=873cf7d4";
 import { buildCardSvg, svgToPng, download } from "./sharecard.js?v=c094fe83";
 import { toast } from "./toast.js?v=0d4cc83d";
 
@@ -263,7 +264,14 @@ async function connect(silent) {
       new ethers.JsonRpcProvider(CHAINS[chainId].rpc, chainId)
     );
   } else {
-    if (!silent) say("没检测到钱包", "bad");
+    if (!silent) {
+      if (IS_MOBILE) {
+        say("手机上要在钱包 App 里打开这一页。", "bad");
+        openWalletSheet();
+      } else {
+        say("没检测到钱包", "bad");
+      }
+    }
     return;
   }
 

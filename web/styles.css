@@ -1183,3 +1183,67 @@ footer a:hover { text-decoration: underline; text-underline-offset: 3px; }
 p, li, dd, .lede, .sub { word-break: normal; overflow-wrap: break-word; }
 /* 地址、哈希这类没有空格的长串必须能断 */
 code, .kp-addr, .addrlink { overflow-wrap: anywhere; }
+
+/* ═════════════════════════════════════════ 在钱包里打开 */
+/*
+ * 只在手机上出现。桌面有插件，用不到这一层。
+ * 从底部升起来而不是居中弹出：手机上拇指够得着的是下半屏。
+ */
+.wsheet { position: fixed; inset: 0; z-index: 60; display: grid; align-items: end; }
+.wsheet-backdrop {
+  position: absolute; inset: 0;
+  background: oklch(0.08 0.018 190 / 0.82);
+}
+.wsheet-panel {
+  position: relative;
+  background: var(--stone-face);
+  border-top: 1px solid var(--rule-strong);
+  border-radius: var(--r-slab) var(--r-slab) 0 0;
+  padding: var(--s5) var(--s5) calc(var(--s5) + env(safe-area-inset-bottom, 0px));
+  box-shadow: var(--slab);
+}
+.wsheet-t {
+  margin: 0 0 var(--s2);
+  font: 700 var(--t-xl)/1.3 var(--carve);
+  letter-spacing: var(--ls-carve); color: var(--lime);
+}
+.wsheet-b {
+  margin: 0 0 var(--s5);
+  font-size: var(--t-sm); line-height: 1.9; color: var(--lime-low);
+}
+.wsheet-list { display: grid; gap: var(--s2); margin-bottom: var(--s4); }
+.wsheet-item {
+  display: flex; align-items: center; justify-content: space-between;
+  /* 44px 是手指的下限，比视觉上"够看"要大一圈 */
+  min-height: 48px; padding: 0 var(--s4);
+  background: var(--sunk-2);
+  border: 1px solid var(--rule);
+  border-radius: var(--r-cut);
+  color: var(--lime); text-decoration: none;
+  font-size: var(--t-md);
+}
+.wsheet-item::after {
+  content: "↗"; font: var(--t-sm) var(--mono); color: var(--lime-faint);
+}
+.wsheet-item:active { background: var(--sunk-3); border-color: var(--seal); }
+.wsheet-copy {
+  display: block; width: 100%; min-height: 44px;
+  margin-bottom: var(--s3); padding: var(--s2) var(--s3);
+  background: none; border: 1px dashed var(--rule);
+  border-radius: var(--r-cut);
+  font: var(--t-xs)/1.6 var(--mono); color: var(--lime-faint);
+  cursor: pointer; word-break: break-all;
+}
+.wsheet-copy:active { color: var(--lime); border-color: var(--seal); }
+.wsheet-x { width: 100%; min-height: 44px; }
+
+@media (min-width: 560px) {
+  /* 平板/桌面上万一走到这条路，别拉成通屏的一条 */
+  .wsheet { align-items: center; justify-items: center; }
+  .wsheet-panel {
+    width: min(420px, calc(100vw - 2 * var(--s5)));
+    border: 1px solid var(--rule-strong);
+    border-radius: var(--r-slab);
+  }
+}
+
