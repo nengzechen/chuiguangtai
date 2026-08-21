@@ -361,3 +361,18 @@ function eip6963Provider() {
 export const IN_BINANCE =
   typeof window !== "undefined" &&
   (!!window.binancew3w?.ethereum || !!window.ethereum?.isBinance);
+
+/**
+ * 只是告诉你一件事的弹层（没有"取消"这一说）。
+ *
+ * 复用「问一句」那套结构，把否定按钮藏起来，用完再放回去 ——
+ * confirmDialog 还要用它。
+ */
+export function noticeDialog({ title, body, ok = "知道了" }) {
+  const no = document.getElementById("ask-no");
+  const wasHidden = no?.hidden;
+  if (no) no.hidden = true;
+  return confirmDialog({ title, body, ok, cancel: "" }).finally(() => {
+    if (no) no.hidden = wasHidden ?? false;
+  });
+}

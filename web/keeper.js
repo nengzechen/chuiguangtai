@@ -6,7 +6,7 @@
  * 称号、星域、亲手写的字、名下的藏品。
  */
 import { ethers } from "./vendor/ethers.js";
-import { CHAINS, short, notOpenYet, metaUrl } from "./shared.js?v=7fac73ed";
+import { CHAINS, short, notOpenYet, metaUrl } from "./shared.js?v=ebcbb2a2";
 import { buildCardSvg, svgToPng, download } from "./sharecard.js?v=c094fe83";
 import { seatPositions, wallChrome } from "./dome.js?v=85c127cd";
 import { toast } from "./toast.js?v=0d4cc83d";
