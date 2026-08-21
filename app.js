@@ -3,7 +3,8 @@ import { seatPositions, wallChrome, asterismGlyph } from "./dome.js?v=85c127cd";
 import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
-import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl } from "./shared.js?v=402f1252";
+import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl,
+  IS_MOBILE, openWalletSheet } from "./shared.js?v=873cf7d4";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -713,7 +714,17 @@ async function connectFlow({ silent }) {
     }
   } else {
     if (!CHAINS[chainId]?.local || !ON_LOCALHOST) {
-      log("没检测到钱包。装一个 MetaMask 再登台。", "bad");
+      /*
+       * 手机浏览器不注入 window.ethereum，只有钱包 App 自带的浏览器才有。
+       * 所以这里不能只说"没检测到钱包"就完 —— 那是把人堵死在门口。
+       * 给一层"在钱包里打开"，把这一页深链进钱包的浏览器。
+       */
+      if (IS_MOBILE) {
+        log("手机上要在钱包 App 里打开这一页。", "bad");
+        openWalletSheet();
+      } else {
+        log("没检测到钱包。装一个 MetaMask 再登台。", "bad");
+      }
       return;
     }
     const provider = new ethers.JsonRpcProvider(CHAINS[chainId].rpc, chainId);

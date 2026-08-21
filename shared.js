@@ -193,3 +193,87 @@ export function confirmDialog({ title, body, ok = "确认", cancel = "取消" })
     addEventListener("keydown", onKey, true);
   });
 }
+
+/* ═══════════════════════════════════════════════ 手机上怎么登台 */
+
+/**
+ * 手机浏览器里没有钱包。
+ *
+ * Safari / Chrome 不会注入 window.ethereum —— 只有钱包 App **自带的浏览器**才有。
+ * 所以手机上点【登台】不该是一句"没检测到钱包"就完了，
+ * 那是把人堵死在门口。正确的做法是把这一页在钱包 App 里重新打开一次。
+ *
+ * 这里不上 WalletConnect：它要注册拿 project id、要连中继服务器、
+ * 要放开 CSP、还要拖一个不小的库进来。而深链只是一个 <a href>，
+ * 立刻能用，也不给这个纯静态站增加任何依赖。
+ */
+export const IS_MOBILE =
+  typeof navigator !== "undefined" &&
+  (/android|iphone|ipad|ipod/i.test(navigator.userAgent) ||
+    (navigator.platform === "MacIntel" && navigator.maxTouchPoints > 1));
+
+/** 各家钱包把外部链接接进自带浏览器的写法。 */
+function walletLinks() {
+  const full = location.href;
+  const bare = location.host + location.pathname + location.search; // MetaMask 要不带协议的
+  const enc = encodeURIComponent(full);
+  return [
+    ["MetaMask", `https://metamask.app.link/dapp/${bare}`],
+    ["Trust Wallet", `https://link.trustwallet.com/open_url?coin_id=60&url=${enc}`],
+    ["Coinbase Wallet", `https://go.cb-w.com/dapp?cb_url=${enc}`],
+    ["imToken", `imtokenv2://navigate/DappView?url=${enc}`],
+  ];
+}
+
+/**
+ * 弹一层"在钱包里打开"。
+ * 结构是现造的，两个页面都能用，不必各自往 HTML 里抄一份。
+ */
+export function openWalletSheet() {
+  document.getElementById("wsheet")?.remove();
+
+  const box = document.createElement("div");
+  box.id = "wsheet";
+  box.className = "wsheet";
+  box.innerHTML = `
+    <div class="wsheet-backdrop" data-wclose></div>
+    <div class="wsheet-panel" role="dialog" aria-modal="true" aria-labelledby="wsheet-t">
+      <h3 class="wsheet-t" id="wsheet-t">在钱包里打开</h3>
+      <p class="wsheet-b">手机浏览器里没有钱包。选一个你装了的，
+        这一页会在它自带的浏览器里重新打开，那里才登得上台。</p>
+      <div class="wsheet-list">
+        ${walletLinks().map(([name, href]) =>
+          `<a class="wsheet-item" href="${href}" rel="noopener">${name}</a>`).join("")}
+      </div>
+      <button class="wsheet-copy" data-wcopy>复制链接，粘到任何钱包的浏览器里</button>
+      <button class="btn ghost small wsheet-x" data-wclose>取消</button>
+    </div>`;
+  document.body.appendChild(box);
+  document.body.style.overflow = "hidden";
+
+  const close = () => {
+    box.remove();
+    document.body.style.overflow = "";
+    removeEventListener("keydown", onKey, true);
+  };
+  const onKey = (e) => { if (e.key === "Escape") { e.stopPropagation(); close(); } };
+  addEventListener("keydown", onKey, true);
+
+  box.addEventListener("click", async (e) => {
+    if (e.target.closest("[data-wclose]")) return close();
+    const copy = e.target.closest("[data-wcopy]");
+    if (copy) {
+      try {
+        await navigator.clipboard.writeText(location.href);
+        copy.textContent = "已复制";
+      } catch {
+        // 剪贴板在非安全上下文/老 WebView 里会被拒，退回选中让人自己复制
+        copy.textContent = location.href;
+        const r = document.createRange();
+        r.selectNodeContents(copy);
+        getSelection()?.removeAllRanges();
+        getSelection()?.addRange(r);
+      }
+    }
+  });
+}
