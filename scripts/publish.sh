@@ -10,7 +10,11 @@
 set -euo pipefail
 cd "$(dirname "$0")/.."
 
-git diff --quiet || { echo "工作区有未提交的改动，先 commit"; exit 1; }
+# 两样都要查：git diff 只看**未暂存**的改动 ——
+# 只 add 没 commit 时它是干净的，于是这里放行、把旧的树发上线，
+# 而提交明明失败了。踩过一次（commit 的 message 里带引号，shell 断在那儿）。
+git diff --quiet && git diff --cached --quiet || {
+  echo "有改动还没提交（暂存区或工作区），先 commit"; exit 1; }
 
 TREE=$(git rev-parse main:web)
 COMMIT=$(git commit-tree "$TREE" -p gh-pages -m "发布 $(git rev-parse --short main)")
