@@ -873,7 +873,28 @@ function paintSurvey(s, { anonymous }) {
       ? `交出 ${EMBERS_PER_SEAT} 枚亲手拾的星屑，换一个刻位。这条路还剩 ${freeLeft} / ${FREE_SEATS} 席。`
       : `能用星屑换的 ${FREE_SEATS} 席已经换完了。剩下的席位只走献纳。`;
 
-  if (anonymous) return;
+  /*
+   * 没登台的人到这里就返回了 —— 于是下面那段门槛逻辑不会跑，
+   * 三个按钮就一直停在 HTML 里写死的初始态：disabled + 原文案。
+   * 那个状态是最糟的一种：`.btn.act:disabled` 只是把底色去掉，
+   * 看上去和能点的按钮一模一样，而 disabled 的按钮连 click 都不会派发 ——
+   * 点下去什么都不发生，也没有任何解释。
+   *
+   * 所以这里把它们改成"能点，且点了有用"：告诉人下一步是登台，
+   * 点下去直接把登台流程拉起来。死路变成路口。
+   */
+  if (anonymous) {
+    askConnectOn("claim", "登台后拾取星屑");
+    askConnectOn("inscribe", "登台后献纳铭刻");
+    askConnectOn("offer", "登台后交星屑换席");
+    return;
+  }
+
+  // 登台之后要把"去登台"那身打扮脱掉 —— 加了没人摘的话，
+  // 连上钱包后按钮还挂着虚线边和朱砂字，看着像还差一步。
+  for (const id of ["claim", "inscribe", "offer"]) {
+    $(id)?.classList.remove("needs-connect");
+  }
 
   const room = roomNow();
   setQty(Math.min(state.qty, Math.max(room, 1)));
@@ -950,6 +971,24 @@ function paintSurvey(s, { anonymous }) {
 }
 
 const disable = (btn, text) => { btn.disabled = true; btn.textContent = text; };
+
+/**
+ * 还没登台就想动手 —— 先把登台流程拉起来，别只丢一句话。
+ * 三个动作入口都走这里，不管用户是从按钮、快捷键还是别处进来的。
+ */
+function needConnectFirst(what) {
+  log(`要${what}，先登台。`);
+  return connect();
+}
+
+/** 未登台时的按钮：看得出来能点，点了就去登台。 */
+function askConnectOn(id, text) {
+  const b = $(id);
+  if (!b) return;
+  b.disabled = false;
+  b.textContent = text;
+  b.classList.add("needs-connect");
+}
 
 function setGate(open, text) {
   // CSS 里这个状态叫 pass。两边名字不一样的那阵子，门槛过了外观也不变
@@ -1679,6 +1718,7 @@ function renderRoster() {
 // ═══════════════════════════════════════════════════════ 写入
 
 async function claimEmbers() {
+  if (!state.connected) return needConnectFirst("拾星屑");
   const btn = $("claim");
   const label = btn.textContent;
   btn.disabled = true;
@@ -1726,6 +1766,7 @@ async function claimEmbers() {
 }
 
 async function inscribe() {
+  if (!state.connected) return needConnectFirst("铭刻");
   const btn = $("inscribe");
   btn.disabled = true;
   btn.textContent = "正在刻入内壁…";
@@ -1790,6 +1831,7 @@ async function myEmberIds(need) {
 
 /** 交出 14 枚星屑，换一个刻位。走的是和献纳同一串刻位号。 */
 async function offerEmbers() {
+  if (!state.connected) return needConnectFirst("换席");
   const btn = $("offer");
   btn.disabled = true;
   btn.textContent = "正在清点星屑…";

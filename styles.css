@@ -593,7 +593,13 @@ h1 {
 }
 .btn:hover:not(:disabled) { background: var(--seal-wash); }
 .btn:active:not(:disabled) { transform: translateY(1px); }
-.btn:disabled { border-color: var(--rule-strong); color: var(--lime-faint); cursor: not-allowed; }
+/* 真的不能点的按钮必须看得出来不能点。
+   之前只换了描边和字色，视觉上和能点的几乎没差别 ——
+   于是"点了没反应"成了这一页最常见的困惑。 */
+.btn:disabled {
+  border-color: var(--rule); color: var(--lime-faint);
+  cursor: not-allowed; opacity: 0.55;
+}
 
 /* 主行动：填充青。整页只有一到两个 */
 .btn.act, .btn.gold {
@@ -607,8 +613,20 @@ h1 {
 .btn.act:disabled, .btn.gold:disabled {
   background: transparent;
   color: var(--lime-faint);
-  border-color: var(--rule-strong);
+  border-color: var(--rule);
+  opacity: 0.55;
 }
+
+/* 未登台时的主行动按钮：它是能点的，只是先带你去登台。
+   用虚线边和朱砂字把"这一步还差点什么"说出来，
+   但不要压暗 —— 压暗等于告诉人别点，那正好是反的。 */
+.btn.needs-connect {
+  border-style: dashed;
+  border-color: var(--rule-seal);
+  color: var(--seal-light);
+  opacity: 1;
+}
+.btn.needs-connect:hover { background: var(--seal-wash); }
 
 .btn.ghost { border-color: var(--rule-strong); color: var(--lime-low); }
 .btn.ghost:hover { color: var(--lime); border-color: var(--seal); background: transparent; }
