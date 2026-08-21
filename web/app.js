@@ -4,7 +4,7 @@ import { toast } from "./toast.js?v=0d4cc83d";
 import { CODEX, GRADE_LINE, RANKS, rankOf, TIMELINE, GLOSSARY, FAQ }
   from "./content.js?v=2c67cd39";
 import { askWallet, confirmDialog, ON_LOCALHOST, notOpenYet, metaUrl,
-  IS_MOBILE, openWalletSheet, injectedProvider, noticeDialog, warnIfStale, staleBanner } from "./shared.js?v=66b4a74a";
+  IS_MOBILE, openWalletSheet, injectedProvider, noticeDialog, warnIfStale, staleBanner, surfaceErrors } from "./shared.js?v=5c8d3823";
 
 // ═══════════════════════════════════════════════════════ 常量
 
@@ -195,6 +195,12 @@ async function preflight(fn, args, overrides) {
  * 骨架和穹顶先画出来，链上数字用微光条占位、到了再填。
  * 动态和藏品这类"看得晚也没关系"的，推到 idle 再拉。
  */
+surfaceErrors((msg) => {
+  // 页面出错了就说出来。控制台用户看不到，钱包自带浏览器更看不到。
+  try { toast("出错了：" + msg, "bad"); } catch {}
+  try { log("未捕获的错误：" + msg, "bad"); } catch {}
+});
+
 async function boot() {
   document.documentElement.classList.add("observatory-loading");
   markLoading();
@@ -712,6 +718,30 @@ function openNoWalletHint() {
   });
 }
 
+/** 链没切过去 —— 这条路必须说话，而且要给能照着做的参数。 */
+function failChain(want, now, err) {
+  const info = CHAINS[want] || {};
+  failLoud(
+    `请把钱包切到 ${info.name || want}`,
+    `钱包当前在链 ${now}，而这一页在 ${want}。` + (err ? `（${readOmen(err)}）` : "")
+  );
+  noticeDialog({
+    title: "钱包不在这条链上",
+    body:
+      `这一页跑在 ${info.name || "Robinhood Chain"}（链 ID ${want}），` +
+      `而你的钱包现在在链 ${now}。\n\n` +
+      "有些钱包（Trust Wallet 最常见）不能自动添加自定义网络，" +
+      "得在钱包里手动加一次。参数如下：\n\n" +
+      `网络名称：${info.name || "Robinhood Chain"}\n` +
+      `RPC 地址：${info.rpc || ""}\n` +
+      `链 ID：${want}\n` +
+      "货币符号：ETH\n" +
+      (info.explorer ? `区块浏览器：${info.explorer}\n` : "") +
+      "\n加完之后把钱包切到这条网络，再回来点【登台】。",
+    ok: "知道了",
+  });
+}
+
 async function connect({ silent }) {
   // 钱包在授权/切链时可能连续触发 accountsChanged 和 chainChanged。
   // 同一时间只允许一条连接流程写 UI，避免按钮、阶段和统计值来回重绘。
@@ -747,7 +777,23 @@ async function connectFlow({ silent }) {
       if (Number(net.chainId) !== chainId) {
         if (silent) return;
         log(`正在切换到 ${CHAINS[chainId]?.name || chainId}…`);
-        await switchChain(chainId);
+        try {
+          await switchChain(chainId);
+        } catch (e) {
+          return failChain(chainId, Number(net.chainId), e);
+        }
+        /*
+         * 切完必须**复查**，不能默认它成功了。
+         * 有的钱包（Trust 尤其常见）对自定义链的 wallet_addEthereumChain
+         * 要么不支持、要么答应下来却没真切过去，而且不抛错。
+         * 原来这里直接递归 connectFlow({silent:true})，链还是不对时
+         * 命中 `if (silent) return` —— 无声退出、state.connected 仍是 false，
+         * 用户以为登台成功了，之后点任何按钮都"没反应"。
+         */
+        const after = await new ethers.BrowserProvider(injectedProvider()).getNetwork();
+        if (Number(after.chainId) !== chainId) {
+          return failChain(chainId, Number(after.chainId), null);
+        }
         return connectFlow({ silent: true });
       }
       state.signer = await browser.getSigner();
@@ -1043,8 +1089,8 @@ const disable = (btn, text) => {
  * 三个动作入口都走这里，不管用户是从按钮、快捷键还是别处进来的。
  */
 function needConnectFirst(what) {
-  log(`要${what}，先登台。`);
-  return connect();
+  failLoud(`要${what}，先登台`);
+  return connect({ silent: false });
 }
 
 /**
