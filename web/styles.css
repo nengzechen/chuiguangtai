@@ -1281,3 +1281,26 @@ code, .kp-addr, .addrlink { overflow-wrap: anywhere; }
   }
 }
 
+
+
+/* ═════════════════════════════════════════ 旧版本横幅 */
+/*
+ * 这条不该是一闪而过的 toast：页面是旧的这件事会一直成立，
+ * 直到人真的刷新为止。所以它钉在顶上，带一个能立刻解决问题的按钮。
+ */
+.stalebar {
+  position: fixed; inset: 0 0 auto 0; z-index: 80;
+  display: flex; align-items: center; justify-content: center;
+  gap: var(--s4); flex-wrap: wrap;
+  padding: 10px var(--s4);
+  background: var(--seal); color: var(--paper);
+  font-size: var(--t-sm); line-height: 1.6;
+  box-shadow: 0 2px 12px oklch(0.08 0.018 190 / 0.5);
+}
+.stalebar button {
+  min-height: 32px; padding: 0 var(--s4);
+  background: var(--paper); color: var(--seal);
+  border: none; border-radius: var(--r-cut);
+  font: 600 var(--t-sm)/1 var(--sans); cursor: pointer;
+}
+.stalebar button:hover { background: var(--lime); }

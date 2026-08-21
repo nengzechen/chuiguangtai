@@ -74,5 +74,34 @@ for (const f of HTML) {
   fs.writeFileSync(p, src);
 }
 
+/*
+ * 构建号：所有指纹再哈一次。
+ *
+ * 为什么需要它：指纹只能保证**资源**不被缓存旧的，管不了 HTML 本身。
+ * GitHub Pages 给 HTML 发 max-age=600，且不读 _headers ——
+ * 于是改完页面十分钟内，回头客拿到的 HTML 还是旧的，
+ * 它引用的自然也是旧的 JS。页面看着正常，行为是上一版的，
+ * 不报错、不留痕 —— 用户只会说"你不是说修好了吗"。
+ *
+ * 所以把构建号同时写进 HTML 和一个单独的 build.json：
+ * 页面起来后用 no-store 拉一次 build.json（绕开 HTTP 缓存），
+ * 对不上就说明手里这份 HTML 是缓存的旧版，当场告诉用户刷新。
+ */
+const build = crypto
+  .createHash("sha256")
+  .update(Object.entries(stamps).map(([f, v]) => f + v).join("|"))
+  .digest("hex")
+  .slice(0, 8);
+
+fs.writeFileSync(path.join(WEB, "build.json"), JSON.stringify({ build }) + "\n");
+
+for (const f of HTML) {
+  const p = path.join(WEB, f);
+  let src = fs.readFileSync(p, "utf8");
+  src = src.replace(/<html([^>]*?)(?:\s+data-build="[0-9a-f]+")?>/, `<html$1 data-build="${build}">`);
+  fs.writeFileSync(p, src);
+}
+
 console.log("内容指纹已打上：");
 for (const [f, v] of Object.entries(stamps)) console.log(`  ${f.padEnd(16)} ${v}`);
+console.log(`  ${"构建号".padEnd(14)} ${build}`);
