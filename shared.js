@@ -418,3 +418,30 @@ export async function warnIfStale(onStale) {
     if (build && build !== mine) onStale(build, mine);
   } catch { /* 拉不到就算了，这只是个体检，不该拦住任何事 */ }
 }
+
+/**
+ * 把没人接住的错误摆到台面上。
+ *
+ * 这个站的绝大多数"点了没反应"，本质都是**出错了但没人说** ——
+ * 异常被 catch 吞掉、或者根本没进 catch，页面静静地什么都不做。
+ * 开发时有控制台，用户没有；钱包自带的浏览器更是连控制台都开不出来。
+ *
+ * 所以未捕获的错误一律显示出来。丑一点无所谓，
+ * 比"什么都没发生"强得多 —— 至少用户能把这句话发给我。
+ */
+export function surfaceErrors(show) {
+  const seen = new Set();
+  const once = (msg) => {
+    if (!msg || seen.has(msg)) return;   // 同一条别刷屏
+    seen.add(msg);
+    show(msg);
+  };
+  addEventListener("error", (e) => {
+    const where = e.filename ? ` (${e.filename.split("/").pop()}:${e.lineno})` : "";
+    once((e.message || "脚本出错") + where);
+  });
+  addEventListener("unhandledrejection", (e) => {
+    const r = e.reason;
+    once(r?.shortMessage || r?.message || String(r || "未知错误"));
+  });
+}
