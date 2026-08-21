@@ -6,8 +6,8 @@
  */
 import { ethers } from "./vendor/ethers.js";
 import { CHAINS, short, readOmen, DEMO_KEY, DISCONNECT_FLAG, askWallet, confirmDialog,
-  ON_LOCALHOST, notOpenYet, metaUrl, IS_MOBILE, openWalletSheet }
-  from "./shared.js?v=873cf7d4";
+  ON_LOCALHOST, notOpenYet, metaUrl, IS_MOBILE, openWalletSheet, injectedProvider }
+  from "./shared.js?v=7fac73ed";
 import { buildCardSvg, svgToPng, download } from "./sharecard.js?v=c094fe83";
 import { toast } from "./toast.js?v=0d4cc83d";
 
@@ -241,13 +241,13 @@ const esc = (s) =>
 async function connect(silent) {
   const { chainId } = state.dep;
 
-  if (window.ethereum) {
-    const bp = new ethers.BrowserProvider(window.ethereum);
+  if (injectedProvider()) {
+    const bp = new ethers.BrowserProvider(injectedProvider());
     try {
       // 手动点的时候把钱包的授权弹窗拉起来，别静默连上
       const accts = silent
         ? await bp.send("eth_accounts", [])
-        : await askWallet(window.ethereum);
+        : await askWallet(injectedProvider());
       if (!accts.length) return;
       if (Number((await bp.getNetwork()).chainId) !== chainId) {
         if (!silent) say("请先把钱包切到 " + (CHAINS[chainId]?.name || chainId), "bad");
